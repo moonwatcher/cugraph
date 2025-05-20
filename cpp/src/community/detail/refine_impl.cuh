@@ -570,7 +570,7 @@ refine_clustering(
     vertex_t nr_valid_tuples = thrust::count_if(handle.get_thrust_policy(),
                                                 gain_and_dst_first,
                                                 gain_and_dst_last,
-                                                [] __device__(auto gain_dst_pair) {
+                                                [POSITIVE_GAIN] __device__(auto gain_dst_pair) {
                                                   vertex_t dst  = thrust::get<1>(gain_dst_pair);
                                                   weight_t gain = thrust::get<0>(gain_dst_pair);
                                                   return (gain > POSITIVE_GAIN) && (dst >= 0);
@@ -610,7 +610,7 @@ refine_clustering(
                     edge_begin,
                     edge_end,
                     d_src_dst_gain_iterator,
-                    [] __device__(thrust::tuple<vertex_t, vertex_t, weight_t> src_dst_gain) {
+                    [POSITIVE_GAIN] __device__(thrust::tuple<vertex_t, vertex_t, weight_t> src_dst_gain) {
                       vertex_t src  = thrust::get<0>(src_dst_gain);
                       vertex_t dst  = thrust::get<1>(src_dst_gain);
                       weight_t gain = thrust::get<2>(src_dst_gain);
