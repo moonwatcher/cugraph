@@ -246,7 +246,7 @@ void core_number(raft::handle_t const& handle,
              k,
              delta,
              v_first =
-               graph_view.local_vertex_partition_range_first()] __device__(auto v,
+               graph_view.local_vertex_partition_range_first(), bucket_idx_next] __device__(auto v,
                                                                            auto v_val,
                                                                            auto pushed_val) {
               auto new_core_number = v_val >= pushed_val ? v_val - pushed_val : edge_t{0};

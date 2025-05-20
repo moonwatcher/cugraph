@@ -277,7 +277,7 @@ compute_renumber_map(raft::handle_t const& handle,
           edgelist_majors[i],
           edgelist_majors[i] + edgelist_edge_counts[i],
           [counts = raft::device_span<edge_t>(d_edge_major_counts.data(),
-                                              d_edge_major_counts.size())] __device__(auto v) {
+                                              d_edge_major_counts.size()), hash_seed] __device__(auto v) {
             cuco::detail::MurmurHash3_32<vertex_t> hash_func{hash_seed};
             cuda::atomic_ref<edge_t, cuda::thread_scope_device> atomic_counter(
               counts[hash_func(v) % num_bins]);
@@ -306,7 +306,7 @@ compute_renumber_map(raft::handle_t const& handle,
           edgelist_minors[i],
           edgelist_minors[i] + edgelist_edge_counts[i],
           [counts = raft::device_span<edge_t>(d_edge_minor_counts.data(),
-                                              d_edge_minor_counts.size())] __device__(auto v) {
+                                              d_edge_minor_counts.size()), hash_seed] __device__(auto v) {
             cuco::detail::MurmurHash3_32<vertex_t> hash_func{hash_seed};
             cuda::atomic_ref<edge_t, cuda::thread_scope_device> atomic_counter(
               counts[hash_func(v) % num_bins]);
@@ -334,7 +334,7 @@ compute_renumber_map(raft::handle_t const& handle,
                             edgelist_majors[j],
                             edgelist_majors[j] + edgelist_edge_counts[j],
                             tmp_majors.begin(),
-                            [i] __device__(auto v) {
+                            [i, hash_seed] __device__(auto v) {
                               cuco::detail::MurmurHash3_32<vertex_t> hash_func{hash_seed};
                               return (static_cast<size_t>(hash_func(v) % num_bins) == i);
                             });
@@ -395,7 +395,7 @@ compute_renumber_map(raft::handle_t const& handle,
                             edgelist_minors[j],
                             edgelist_minors[j] + edgelist_edge_counts[j],
                             tmp_minors.begin(),
-                            [i] __device__(auto v) {
+                            [i, hash_seed] __device__(auto v) {
                               cuco::detail::MurmurHash3_32<vertex_t> hash_func{hash_seed};
                               return (static_cast<size_t>(hash_func(v) % num_bins) == i);
                             });

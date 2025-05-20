@@ -129,7 +129,7 @@ void sssp(raft::handle_t const& handle,
     thrust::make_counting_iterator(push_graph_view.local_vertex_partition_range_first()),
     thrust::make_counting_iterator(push_graph_view.local_vertex_partition_range_last()),
     val_first,
-    [source_vertex] __device__(auto val) {
+    [source_vertex, invalid_vertex] __device__(auto val) {
       auto distance = invalid_distance;
       if (val == source_vertex) { distance = weight_t{0.0}; }
       return thrust::make_tuple(distance, invalid_vertex);
@@ -220,7 +220,7 @@ void sssp(raft::handle_t const& handle,
       std::vector<size_t>{bucket_idx_next_near, bucket_idx_far},
       distances,
       thrust::make_zip_iterator(thrust::make_tuple(distances, predecessor_first)),
-      [near_far_threshold] __device__(auto v, auto v_val, auto pushed_val) {
+      [near_far_threshold, bucket_idx_next_near, bucket_idx_far] __device__(auto v, auto v_val, auto pushed_val) {
         auto new_dist = thrust::get<0>(pushed_val);
         auto update   = (new_dist < v_val);
         return thrust::make_tuple(
@@ -246,7 +246,7 @@ void sssp(raft::handle_t const& handle,
         vertex_frontier.split_bucket(
           bucket_idx_far,
           std::vector<size_t>{bucket_idx_cur_near},
-          [vertex_partition, distances, old_near_far_threshold, near_far_threshold] __device__(
+          [vertex_partition, distances, old_near_far_threshold, near_far_threshold, bucket_idx_cur_near, bucket_idx_far] __device__(
             auto v) {
             auto dist =
               *(distances + vertex_partition.local_vertex_partition_offset_from_vertex_nocheck(v));

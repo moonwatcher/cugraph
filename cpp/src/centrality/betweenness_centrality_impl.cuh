@@ -153,7 +153,7 @@ std::tuple<rmm::device_uvector<vertex_t>, rmm::device_uvector<edge_t>> brandes_b
                       std::vector<size_t>{bucket_idx_next},
                       thrust::make_zip_iterator(distances.begin(), sigmas.begin()),
                       thrust::make_zip_iterator(distances.begin(), sigmas.begin()),
-                      [hop] __device__(auto v, auto old_values, auto v_sigma) {
+                      [hop, bucket_idx_next] __device__(auto v, auto old_values, auto v_sigma) {
                         return thrust::make_tuple(
                           cuda::std::make_optional(bucket_idx_next),
                           cuda::std::make_optional(thrust::make_tuple(hop + 1, v_sigma)));
