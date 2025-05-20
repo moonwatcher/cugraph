@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2022-2025, NVIDIA CORPORATION.
  *
@@ -31,7 +32,7 @@
 
 #include <raft/random/rng.cuh>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/atomic>
 #include <cuda/functional>
 #include <cuda/std/optional>

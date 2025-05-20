@@ -44,7 +44,7 @@ class partition_manager {
   // to map the major sub-communicator to the GPU row communicator or the GPU column communicator.
   static constexpr bool map_major_comm_to_gpu_row_comm = true;
 
-#ifdef __CUDACC__
+#ifdef __HIPCC__
   __host__ __device__
 #endif
     static int
@@ -58,7 +58,7 @@ class partition_manager {
                  (vertex_partition_id / major_comm_size);
   }
 
-#ifdef __CUDACC__
+#ifdef __HIPCC__
   __host__ __device__
 #endif
     static int
@@ -71,7 +71,7 @@ class partition_manager {
                                           : (major_comm_rank * minor_comm_size + minor_comm_rank);
   }
 
-#ifdef __CUDACC__
+#ifdef __HIPCC__
   __host__ __device__
 #endif
     static int
@@ -83,7 +83,7 @@ class partition_manager {
                                           : comm_rank / minor_comm_size;
   }
 
-#ifdef __CUDACC__
+#ifdef __HIPCC__
   __host__ __device__
 #endif
     static int
@@ -95,7 +95,7 @@ class partition_manager {
                                           : comm_rank % minor_comm_size;
   }
 
-#ifdef __CUDACC__
+#ifdef __HIPCC__
   __host__ __device__
 #endif
     static int

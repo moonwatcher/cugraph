@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2025, NVIDIA CORPORATION.
  *
@@ -42,7 +43,7 @@
 #include <rmm/device_scalar.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/std/optional>
 #include <thrust/binary_search.h>
 #include <thrust/copy.h>
@@ -743,7 +744,7 @@ transform_reduce_if_v_frontier_outgoing_e_by_dst(raft::handle_t const& handle,
 
           int subgroup_size{};
           int num_gpus_per_node{};
-          RAFT_CUDA_TRY(cudaGetDeviceCount(&num_gpus_per_node));
+          RAFT_CUDA_TRY(hipGetDeviceCount(&num_gpus_per_node));
           if (comm_size <= num_gpus_per_node) {
             subgroup_size = major_comm_size;
           } else {

@@ -259,7 +259,7 @@ class edge_partition_device_view_t<vertex_t, edge_t, multi_gpu, std::enable_if_t
                                               rmm::cuda_stream_view stream) const
   {
     if (thrust::distance(major_first, major_last) == 0) {
-      RAFT_CUDA_TRY(cudaMemsetAsync(count.data(), 0, sizeof(size_t), stream));
+      RAFT_CUDA_TRY(hipMemsetAsync(count.data(), 0, sizeof(size_t), stream));
     }
 
     rmm::device_uvector<std::byte> d_tmp_storage(0, stream);
@@ -274,14 +274,14 @@ class edge_partition_device_view_t<vertex_t, edge_t, multi_gpu, std::enable_if_t
                                   multi_gpu,
                                   true>{
           this->offsets_, major_range_first_, *dcs_nzd_vertices_, *major_hypersparse_first_});
-      cub::DeviceReduce::Sum(static_cast<void*>(nullptr),
+      hipcub::DeviceReduce::Sum(static_cast<void*>(nullptr),
                              tmp_storage_bytes,
                              local_degree_first,
                              count.data(),
                              thrust::distance(major_first, major_last),
                              stream);
       d_tmp_storage.resize(tmp_storage_bytes, stream);
-      cub::DeviceReduce::Sum(d_tmp_storage.data(),
+      hipcub::DeviceReduce::Sum(d_tmp_storage.data(),
                              tmp_storage_bytes,
                              local_degree_first,
                              count.data(),
@@ -296,14 +296,14 @@ class edge_partition_device_view_t<vertex_t, edge_t, multi_gpu, std::enable_if_t
                                   multi_gpu,
                                   false>{
           this->offsets_, major_range_first_, std::byte{0} /* dummy */, std::byte{0} /* dummy */});
-      cub::DeviceReduce::Sum(static_cast<void*>(nullptr),
+      hipcub::DeviceReduce::Sum(static_cast<void*>(nullptr),
                              tmp_storage_bytes,
                              local_degree_first,
                              count.data(),
                              thrust::distance(major_first, major_last),
                              stream);
       d_tmp_storage.resize(tmp_storage_bytes, stream);
-      cub::DeviceReduce::Sum(d_tmp_storage.data(),
+      hipcub::DeviceReduce::Sum(d_tmp_storage.data(),
                              tmp_storage_bytes,
                              local_degree_first,
                              count.data(),
@@ -658,7 +658,7 @@ class edge_partition_device_view_t<vertex_t, edge_t, multi_gpu, std::enable_if_t
                                               rmm::cuda_stream_view stream) const
   {
     if (thrust::distance(major_first, major_last) == 0) {
-      RAFT_CUDA_TRY(cudaMemsetAsync(count.data(), 0, sizeof(size_t), stream));
+      RAFT_CUDA_TRY(hipMemsetAsync(count.data(), 0, sizeof(size_t), stream));
     }
 
     rmm::device_uvector<std::byte> d_tmp_storage(0, stream);
@@ -674,14 +674,14 @@ class edge_partition_device_view_t<vertex_t, edge_t, multi_gpu, std::enable_if_t
                                        std::byte{0} /* dummy */,
                                        std::byte{0} /* dummy */,
                                        std::byte{0} /* dummy */});
-    cub::DeviceReduce::Sum(static_cast<void*>(nullptr),
+    hipcub::DeviceReduce::Sum(static_cast<void*>(nullptr),
                            tmp_storage_bytes,
                            local_degree_first,
                            count.data(),
                            thrust::distance(major_first, major_last),
                            stream);
     d_tmp_storage.resize(tmp_storage_bytes, stream);
-    cub::DeviceReduce::Sum(d_tmp_storage.data(),
+    hipcub::DeviceReduce::Sum(d_tmp_storage.data(),
                            tmp_storage_bytes,
                            local_degree_first,
                            count.data(),

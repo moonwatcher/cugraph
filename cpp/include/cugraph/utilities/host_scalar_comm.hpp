@@ -72,7 +72,7 @@ struct host_allreduce_tuple_scalar_element_impl {
   void run(raft::comms::comms_t const& comm,
            rmm::device_uvector<int64_t>& tuple_scalar_elements,
            raft::comms::op_t op,
-           cudaStream_t stream) const
+           hipStream_t stream) const
   {
     using element_t = typename thrust::tuple_element<I, TupleType>::type;
     static_assert(sizeof(element_t) <= sizeof(int64_t));
@@ -88,7 +88,7 @@ struct host_allreduce_tuple_scalar_element_impl<TupleType, I, I> {
   void run(raft::comms::comms_t const& comm,
            rmm::device_uvector<int64_t>& tuple_scalar_elements,
            raft::comms::op_t op,
-           cudaStream_t stream) const
+           hipStream_t stream) const
   {
   }
 };
@@ -99,7 +99,7 @@ struct host_reduce_tuple_scalar_element_impl {
            rmm::device_uvector<int64_t>& tuple_scalar_elements,
            raft::comms::op_t op,
            int root,
-           cudaStream_t stream) const
+           hipStream_t stream) const
   {
     using element_t = typename thrust::tuple_element<I, TupleType>::type;
     static_assert(sizeof(element_t) <= sizeof(int64_t));
@@ -116,7 +116,7 @@ struct host_reduce_tuple_scalar_element_impl<TupleType, I, I> {
            rmm::device_uvector<int64_t>& tuple_scalar_elements,
            raft::comms::op_t op,
            int root,
-           cudaStream_t stream) const
+           hipStream_t stream) const
   {
   }
 };
@@ -125,7 +125,7 @@ struct host_reduce_tuple_scalar_element_impl<TupleType, I, I> {
 
 template <typename T>
 std::enable_if_t<std::is_arithmetic<T>::value, T> host_scalar_allreduce(
-  raft::comms::comms_t const& comm, T input, raft::comms::op_t op, cudaStream_t stream)
+  raft::comms::comms_t const& comm, T input, raft::comms::op_t op, hipStream_t stream)
 {
   rmm::device_uvector<T> d_input(1, stream);
   raft::update_device(d_input.data(), &input, 1, stream);
@@ -139,7 +139,7 @@ std::enable_if_t<std::is_arithmetic<T>::value, T> host_scalar_allreduce(
 
 template <typename T>
 std::enable_if_t<cugraph::is_thrust_tuple_of_arithmetic<T>::value, T> host_scalar_allreduce(
-  raft::comms::comms_t const& comm, T input, raft::comms::op_t op, cudaStream_t stream)
+  raft::comms::comms_t const& comm, T input, raft::comms::op_t op, hipStream_t stream)
 {
   size_t constexpr tuple_size = thrust::tuple_size<T>::value;
   std::vector<int64_t> h_tuple_scalar_elements(tuple_size);
@@ -165,7 +165,7 @@ std::enable_if_t<cugraph::is_thrust_tuple_of_arithmetic<T>::value, T> host_scala
 // Return value is valid only in root (return value may better be std::optional in C++17 or later)
 template <typename T>
 std::enable_if_t<std::is_arithmetic<T>::value, T> host_scalar_reduce(
-  raft::comms::comms_t const& comm, T input, raft::comms::op_t op, int root, cudaStream_t stream)
+  raft::comms::comms_t const& comm, T input, raft::comms::op_t op, int root, hipStream_t stream)
 {
   rmm::device_uvector<T> d_input(1, stream);
   raft::update_device(d_input.data(), &input, 1, stream);
@@ -180,7 +180,7 @@ std::enable_if_t<std::is_arithmetic<T>::value, T> host_scalar_reduce(
 // Return value is valid only in root (return value may better be std::optional in C++17 or later)
 template <typename T>
 std::enable_if_t<cugraph::is_thrust_tuple_of_arithmetic<T>::value, T> host_scalar_reduce(
-  raft::comms::comms_t const& comm, T input, raft::comms::op_t op, int root, cudaStream_t stream)
+  raft::comms::comms_t const& comm, T input, raft::comms::op_t op, int root, hipStream_t stream)
 {
   size_t constexpr tuple_size = thrust::tuple_size<T>::value;
   std::vector<int64_t> h_tuple_scalar_elements(tuple_size);
@@ -209,7 +209,7 @@ std::enable_if_t<cugraph::is_thrust_tuple_of_arithmetic<T>::value, T> host_scala
 
 template <typename T>
 std::enable_if_t<std::is_arithmetic<T>::value, T> host_scalar_bcast(
-  raft::comms::comms_t const& comm, T input, int root, cudaStream_t stream)
+  raft::comms::comms_t const& comm, T input, int root, hipStream_t stream)
 {
   rmm::device_uvector<T> d_input(1, stream);
   if (comm.get_rank() == root) { raft::update_device(d_input.data(), &input, 1, stream); }
@@ -223,7 +223,7 @@ std::enable_if_t<std::is_arithmetic<T>::value, T> host_scalar_bcast(
 
 template <typename T>
 std::enable_if_t<cugraph::is_thrust_tuple_of_arithmetic<T>::value, T> host_scalar_bcast(
-  raft::comms::comms_t const& comm, T input, int root, cudaStream_t stream)
+  raft::comms::comms_t const& comm, T input, int root, hipStream_t stream)
 {
   size_t constexpr tuple_size = thrust::tuple_size<T>::value;
   std::vector<int64_t> h_tuple_scalar_elements(tuple_size);
@@ -253,7 +253,7 @@ std::enable_if_t<cugraph::is_thrust_tuple_of_arithmetic<T>::value, T> host_scala
 
 template <typename T>
 std::enable_if_t<std::is_arithmetic<T>::value, std::vector<T>> host_scalar_allgather(
-  raft::comms::comms_t const& comm, T input, cudaStream_t stream)
+  raft::comms::comms_t const& comm, T input, hipStream_t stream)
 {
   rmm::device_uvector<T> d_outputs(comm.get_size(), stream);
   raft::update_device(d_outputs.data() + comm.get_rank(), &input, 1, stream);
@@ -267,7 +267,7 @@ std::enable_if_t<std::is_arithmetic<T>::value, std::vector<T>> host_scalar_allga
 
 template <typename T>
 std::enable_if_t<cugraph::is_thrust_tuple_of_arithmetic<T>::value, std::vector<T>>
-host_scalar_allgather(raft::comms::comms_t const& comm, T input, cudaStream_t stream)
+host_scalar_allgather(raft::comms::comms_t const& comm, T input, hipStream_t stream)
 {
   size_t constexpr tuple_size = thrust::tuple_size<T>::value;
   std::vector<int64_t> h_tuple_scalar_elements(tuple_size);
@@ -309,7 +309,7 @@ std::enable_if_t<std::is_arithmetic<T>::value, T> host_scalar_scatter(
   raft::comms::comms_t const& comm,
   std::vector<T> const& inputs,  // relevant only in root
   int root,
-  cudaStream_t stream)
+  hipStream_t stream)
 {
   CUGRAPH_EXPECTS(
     ((comm.get_rank() == root) && (inputs.size() == static_cast<size_t>(comm.get_size()))) ||
@@ -332,7 +332,7 @@ std::enable_if_t<cugraph::is_thrust_tuple_of_arithmetic<T>::value, T> host_scala
   raft::comms::comms_t const& comm,
   std::vector<T> const& inputs,  // relevant only in root
   int root,
-  cudaStream_t stream)
+  hipStream_t stream)
 {
   CUGRAPH_EXPECTS(
     ((comm.get_rank() == root) && (inputs.size() == static_cast<size_t>(comm.get_size()))) ||
@@ -372,7 +372,7 @@ std::enable_if_t<cugraph::is_thrust_tuple_of_arithmetic<T>::value, T> host_scala
 // Return value is valid only in root (return value may better be std::optional in C++17 or later)
 template <typename T>
 std::enable_if_t<std::is_arithmetic<T>::value, std::vector<T>> host_scalar_gather(
-  raft::comms::comms_t const& comm, T input, int root, cudaStream_t stream)
+  raft::comms::comms_t const& comm, T input, int root, hipStream_t stream)
 {
   rmm::device_uvector<T> d_outputs(comm.get_rank() == root ? comm.get_size() : int{1}, stream);
   raft::update_device(
@@ -397,7 +397,7 @@ std::enable_if_t<std::is_arithmetic<T>::value, std::vector<T>> host_scalar_gathe
 // Return value is valid only in root (return value may better be std::optional in C++17 or later)
 template <typename T>
 std::enable_if_t<cugraph::is_thrust_tuple_of_arithmetic<T>::value, std::vector<T>>
-host_scalar_gather(raft::comms::comms_t const& comm, T input, int root, cudaStream_t stream)
+host_scalar_gather(raft::comms::comms_t const& comm, T input, int root, hipStream_t stream)
 {
   size_t constexpr tuple_size = thrust::tuple_size<T>::value;
   std::vector<int64_t> h_tuple_scalar_elements(tuple_size);

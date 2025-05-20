@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2020-2024, NVIDIA CORPORATION.
  *
@@ -57,7 +58,7 @@ void apply_repulsion(const float* restrict x_pos,
                      const int* restrict mass,
                      const float scaling_ratio,
                      const vertex_t n,
-                     cudaStream_t stream)
+                     hipStream_t stream)
 {
   dim3 nthreads(TPB_X, TPB_Y);
   dim3 nblocks(min((n + nthreads.x - 1) / nthreads.x, CUDA_MAX_BLOCKS_2D),

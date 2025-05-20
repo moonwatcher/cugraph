@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2020-2025, NVIDIA CORPORATION.
  *
@@ -110,7 +111,7 @@ struct update_v_frontier_call_v_op_t<vertex_t,
   }
 };
 
-// FIXME: a temporary workaround for cudaErrorInvalidDeviceFunction error when device lambda is used
+// FIXME: a temporary workaround for hipErrorInvalidDeviceFunction error when device lambda is used
 // after if constexpr else statement that involves device lambda (bug report submitted)
 template <typename key_t>
 struct check_invalid_bucket_idx_t {

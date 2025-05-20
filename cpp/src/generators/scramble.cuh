@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /* Copyright (C) 2009-2010 The Trustees of Indiana University.             */
 /*                                                                         */
 /* Use, modification and distribution is subject to the Boost Software     */

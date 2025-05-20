@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2020-2025, NVIDIA CORPORATION.
  *
@@ -39,7 +40,7 @@
 #include <rmm/device_scalar.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/std/optional>
 #include <thrust/binary_search.h>
 #include <thrust/copy.h>
@@ -174,7 +175,7 @@ __global__ static void extract_transform_if_v_frontier_e_hypersparse_or_low_degr
   __shared__ edge_t
     warp_key_local_edge_offsets[extract_transform_if_v_frontier_e_kernel_block_size];
 
-  using WarpScan = cub::WarpScan<edge_t, raft::warp_size()>;
+  using WarpScan = hipcub::WarpScan<edge_t, raft::warp_size()>;
   __shared__ typename WarpScan::TempStorage temp_storage;
 
   auto indices = edge_partition.indices();

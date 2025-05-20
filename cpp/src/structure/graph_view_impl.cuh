@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2020-2025, NVIDIA CORPORATION.
  *
@@ -265,7 +266,7 @@ __global__ static void for_all_major_for_all_nbr_mid_degree(
     static_cast<size_t>(major_range_first - edge_partition.major_range_first());
   size_t idx = static_cast<size_t>(tid / raft::warp_size());
 
-  using BlockReduce = cub::BlockReduce<edge_t, count_edge_partition_multi_edges_block_size>;
+  using BlockReduce = hipcub::BlockReduce<edge_t, count_edge_partition_multi_edges_block_size>;
   __shared__ typename BlockReduce::TempStorage temp_storage;
   property_op<edge_t, thrust::plus> edge_property_add{};
   edge_t count_sum{0};
@@ -296,7 +297,7 @@ __global__ static void for_all_major_for_all_nbr_high_degree(
     static_cast<size_t>(major_range_first - edge_partition.major_range_first());
   size_t idx = static_cast<size_t>(blockIdx.x);
 
-  using BlockReduce = cub::BlockReduce<edge_t, count_edge_partition_multi_edges_block_size>;
+  using BlockReduce = hipcub::BlockReduce<edge_t, count_edge_partition_multi_edges_block_size>;
   __shared__ typename BlockReduce::TempStorage temp_storage;
   property_op<edge_t, thrust::plus> edge_property_add{};
   edge_t count_sum{0};

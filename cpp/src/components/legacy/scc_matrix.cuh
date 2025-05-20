@@ -185,7 +185,7 @@ struct SCC_Data {
                             // write the _same_ value
         });
       ++count;
-      cudaDeviceSynchronize();
+      hipDeviceSynchronize();
 
       std::swap(p_d_C_, p_d_Cprev);  // Note 1: this swap makes `p_d_Cprev` the
                                      // most recently updated matrix pointer

@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2024, NVIDIA CORPORATION.
  *
@@ -24,7 +25,7 @@
 #include <rmm/device_scalar.hpp>
 #include <rmm/device_uvector.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 
 #include <numeric>
 #include <vector>
@@ -66,13 +67,13 @@ void copy_if_nosync(InputIterator input_first,
   CUGRAPH_EXPECTS(
     static_cast<size_t>(thrust::distance(input_first, input_last)) <=
       static_cast<size_t>(std::numeric_limits<int>::max()),
-    "cugraph::detail::copy_if_nosync relies on cub::DeviceSelect::Flagged which uses int for input "
+    "cugraph::detail::copy_if_nosync relies on hipcub::DeviceSelect::Flagged which uses int for input "
     "size, but thrust::distance(input_first, input_last) exceeds std::numeric_limits<int>::max().");
 
   size_t tmp_storage_bytes{0};
   size_t input_size = static_cast<int>(thrust::distance(input_first, input_last));
 
-  cub::DeviceSelect::Flagged(static_cast<void*>(nullptr),
+  hipcub::DeviceSelect::Flagged(static_cast<void*>(nullptr),
                              tmp_storage_bytes,
                              input_first,
                              flag_first,
@@ -83,7 +84,7 @@ void copy_if_nosync(InputIterator input_first,
 
   auto d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, stream_view);
 
-  cub::DeviceSelect::Flagged(d_tmp_storage.data(),
+  hipcub::DeviceSelect::Flagged(d_tmp_storage.data(),
                              tmp_storage_bytes,
                              input_first,
                              flag_first,
@@ -103,13 +104,13 @@ void count_nosync(InputIterator input_first,
   CUGRAPH_EXPECTS(
     static_cast<size_t>(thrust::distance(input_first, input_last)) <=
       static_cast<size_t>(std::numeric_limits<int>::max()),
-    "cugraph::detail::count_nosync relies on cub::DeviceReduce::Sum which uses int for input size, "
+    "cugraph::detail::count_nosync relies on hipcub::DeviceReduce::Sum which uses int for input size, "
     "but thrust::distance(input_first, input_last) exceeds std::numeric_limits<int>::max().");
 
   size_t tmp_storage_bytes{0};
   size_t input_size = static_cast<int>(thrust::distance(input_first, input_last));
 
-  cub::DeviceReduce::Sum(static_cast<void*>(nullptr),
+  hipcub::DeviceReduce::Sum(static_cast<void*>(nullptr),
                          tmp_storage_bytes,
                          input_first,
                          count.data(),
@@ -118,7 +119,7 @@ void count_nosync(InputIterator input_first,
 
   auto d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, stream_view);
 
-  cub::DeviceReduce::Sum(
+  hipcub::DeviceReduce::Sum(
     d_tmp_storage.data(), tmp_storage_bytes, input_first, count.data(), input_size, stream_view);
 }
 
@@ -132,13 +133,13 @@ void sum_nosync(
   CUGRAPH_EXPECTS(
     static_cast<size_t>(thrust::distance(input_first, input_last)) <=
       static_cast<size_t>(std::numeric_limits<int>::max()),
-    "cugraph::detail::count_nosync relies on cub::DeviceReduce::Sum which uses int for input size, "
+    "cugraph::detail::count_nosync relies on hipcub::DeviceReduce::Sum which uses int for input size, "
     "but thrust::distance(input_first, input_last) exceeds std::numeric_limits<int>::max().");
 
   size_t tmp_storage_bytes{0};
   size_t input_size = static_cast<int>(thrust::distance(input_first, input_last));
 
-  cub::DeviceReduce::Sum(static_cast<void*>(nullptr),
+  hipcub::DeviceReduce::Sum(static_cast<void*>(nullptr),
                          tmp_storage_bytes,
                          input_first,
                          sum.data(),
@@ -147,7 +148,7 @@ void sum_nosync(
 
   auto d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, stream_view);
 
-  cub::DeviceReduce::Sum(
+  hipcub::DeviceReduce::Sum(
     d_tmp_storage.data(), tmp_storage_bytes, input_first, sum.data(), input_size, stream_view);
 }
 

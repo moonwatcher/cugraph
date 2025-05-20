@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2020-2024, NVIDIA CORPORATION.
  *
@@ -34,7 +35,7 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <thrust/adjacent_difference.h>
 #include <thrust/binary_search.h>
 #include <thrust/copy.h>
