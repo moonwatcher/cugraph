@@ -119,7 +119,7 @@ struct k_core_functor : public cugraph::c_api::abstract_functor {
             do_expensive_check_);
       }
 
-      auto degree_type = reinterpret_cast<cugraph::k_core_degree_type_t>(degree_type);
+      cugraph::k_core_degree_type_t degree_type = static_cast<cugraph::k_core_degree_type_t>(degree_type_);
 
       auto [result_src, result_dst, result_wgt] =
         cugraph::k_core<vertex_t, edge_t, weight_t, multi_gpu>(
