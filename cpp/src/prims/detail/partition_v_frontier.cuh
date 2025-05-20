@@ -28,7 +28,7 @@
 
 #include <raft/random/rng.cuh>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/atomic>
 #include <cuda/functional>
 #include <thrust/copy.h>

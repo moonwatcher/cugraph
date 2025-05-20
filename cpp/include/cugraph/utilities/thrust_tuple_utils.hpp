@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2020-2024, NVIDIA CORPORATION.
  *
@@ -252,7 +253,7 @@ auto to_thrust_iterator_tuple(Iterator iter)
 }
 
 template <typename T, size_t I, typename std::enable_if_t<std::is_arithmetic_v<T>>* = nullptr>
-#ifdef __CUDACC__
+#ifdef __HIPCC__
 __host__ __device__
 #endif
   auto
@@ -264,7 +265,7 @@ __host__ __device__
 template <typename T,
           size_t I,
           typename std::enable_if_t<is_thrust_tuple_of_arithmetic<T>::value>* = nullptr>
-#ifdef __CUDACC__
+#ifdef __HIPCC__
 __host__ __device__
 #endif
   auto
@@ -277,7 +278,7 @@ template <typename Iterator,
           size_t I,
           typename std::enable_if_t<std::is_arithmetic_v<
             typename thrust::iterator_traits<Iterator>::value_type>>* = nullptr>
-#ifdef __CUDACC__
+#ifdef __HIPCC__
 __host__ __device__
 #endif
   auto
@@ -290,7 +291,7 @@ template <typename Iterator,
           size_t I,
           typename std::enable_if_t<is_thrust_tuple_of_arithmetic<
             typename thrust::iterator_traits<Iterator>::value_type>::value>* = nullptr>
-#ifdef __CUDACC__
+#ifdef __HIPCC__
 __host__ __device__
 #endif
   auto

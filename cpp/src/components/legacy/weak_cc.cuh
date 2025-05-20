@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2019-2024, NVIDIA CORPORATION.
  *
@@ -26,7 +27,7 @@
 #include <thrust/scan.h>
 #include <thrust/swap.h>
 
-#include <cuda_runtime.h>
+#include <hip/hip_runtime.h>
 
 #include <stdio.h>
 
@@ -154,7 +155,7 @@ void weak_cc_label_batched(vertex_t* labels,
                            WeakCCState& state,
                            vertex_t startVertexId,
                            vertex_t batchSize,
-                           cudaStream_t stream,
+                           hipStream_t stream,
                            Lambda filter_op)
 {
   ASSERT(sizeof(vertex_t) == 4 || sizeof(vertex_t) == 8, "Index_ should be 4 or 8 bytes");
@@ -168,22 +169,22 @@ void weak_cc_label_batched(vertex_t* labels,
   weak_cc_init_label_kernel<vertex_t, TPB_X>
     <<<blocks, threads, 0, stream>>>(labels, startVertexId, batchSize, MAX_LABEL, filter_op);
 
-  RAFT_CUDA_TRY(cudaPeekAtLastError());
+  RAFT_CUDA_TRY(hipPeekAtLastError());
 
   int n_iters = 0;
   do {
-    RAFT_CUDA_TRY(cudaMemsetAsync(state.m, false, sizeof(bool), stream));
+    RAFT_CUDA_TRY(hipMemsetAsync(state.m, false, sizeof(bool), stream));
 
     weak_cc_label_device<vertex_t, edge_t, TPB_X><<<blocks, threads, 0, stream>>>(
       labels, offsets, indices, nnz, state.fa, state.xa, state.m, startVertexId, batchSize);
-    RAFT_CUDA_TRY(cudaPeekAtLastError());
-    RAFT_CUDA_TRY(cudaStreamSynchronize(stream));
+    RAFT_CUDA_TRY(hipPeekAtLastError());
+    RAFT_CUDA_TRY(hipStreamSynchronize(stream));
 
     thrust::swap(state.fa, state.xa);
 
     //** Updating m *
     MLCommon::updateHost(&host_m, state.m, 1, stream);
-    RAFT_CUDA_TRY(cudaStreamSynchronize(stream));
+    RAFT_CUDA_TRY(hipStreamSynchronize(stream));
 
     n_iters++;
   } while (host_m);
@@ -228,7 +229,7 @@ void weak_cc_batched(vertex_t* labels,
                      vertex_t startVertexId,
                      vertex_t batchSize,
                      WeakCCState& state,
-                     cudaStream_t stream,
+                     hipStream_t stream,
                      Lambda filter_op)
 {
   dim3 blocks(ceildiv(N, TPB_X));
@@ -238,7 +239,7 @@ void weak_cc_batched(vertex_t* labels,
   if (startVertexId == 0) {
     weak_cc_init_all_kernel<vertex_t, TPB_X>
       <<<blocks, threads, 0, stream>>>(labels, state.fa, state.xa, N, MAX_LABEL);
-    RAFT_CUDA_TRY(cudaPeekAtLastError());
+    RAFT_CUDA_TRY(hipPeekAtLastError());
   }
 
   weak_cc_label_batched<vertex_t, edge_t, TPB_X>(
@@ -281,7 +282,7 @@ void weak_cc(vertex_t* labels,
              vertex_t const* indices,
              edge_t nnz,
              vertex_t N,
-             cudaStream_t stream,
+             hipStream_t stream,
              Lambda filter_op)
 {
   rmm::device_vector<bool> xa(N);
@@ -323,7 +324,7 @@ void weak_cc_entry(vertex_t* labels,
                    vertex_t const* indices,
                    edge_t nnz,
                    vertex_t N,
-                   cudaStream_t stream)
+                   hipStream_t stream)
 {
   weak_cc(labels, offsets, indices, nnz, N, stream, [] __device__(vertex_t) { return true; });
 }

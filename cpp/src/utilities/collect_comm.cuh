@@ -218,7 +218,7 @@ collect_values_for_sorted_unique_int_vertices(
   raft::update_host(h_offsets.data() + 1, d_offsets.data(), d_offsets.size(), stream_view);
   h_offsets[0]     = 0;
   h_offsets.back() = collect_sorted_unique_int_vertices.size();
-  RAFT_CUDA_TRY(cudaStreamSynchronize(stream_view));
+  RAFT_CUDA_TRY(hipStreamSynchronize(stream_view));
 
   std::vector<size_t> tx_counts(comm_rank_vertex_partition_range_lasts.size());
   std::adjacent_difference(h_offsets.begin() + 1, h_offsets.end(), tx_counts.begin());

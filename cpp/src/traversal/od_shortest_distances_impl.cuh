@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2024-2025, NVIDIA CORPORATION.
  *
@@ -241,7 +242,7 @@ __global__ static void multi_partition_copy(
       std::numeric_limits<int32_t>::max()));  // int32_t is sufficient to store the maximum possible
                                               // number of updates per block
 
-  using BlockScan = cub::BlockScan<int32_t, multi_partition_copy_block_size>;
+  using BlockScan = hipcub::BlockScan<int32_t, multi_partition_copy_block_size>;
   __shared__ typename BlockScan::TempStorage temp_storage;
 
   __shared__ size_t block_start_offsets[max_num_partitions];

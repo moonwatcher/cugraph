@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2023-2025, NVIDIA CORPORATION.
  *
@@ -27,7 +28,7 @@
 
 #include <rmm/device_uvector.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/functional>
 #include <cuda/std/optional>
 #include <thrust/binary_search.h>
@@ -561,7 +562,7 @@ compute_min_hop_for_unique_label_vertex_pairs(
       thrust::sequence(
         handle.get_thrust_policy(), tmp_indices.begin(), tmp_indices.end(), size_t{0});
 
-      // cub::DeviceSegmentedSort currently does not suuport thrust::tuple type keys, sorting in
+      // hipcub::DeviceSegmentedSort currently does not suuport thrust::tuple type keys, sorting in
       // chunks still helps in limiting the binary search range and improving memory locality
       for (size_t i = 0; i < num_chunks; ++i) {
         thrust::sort(
@@ -646,7 +647,7 @@ compute_min_hop_for_unique_label_vertex_pairs(
         auto offset_first =
           thrust::make_transform_iterator((*edgelist_label_offsets).data() + h_label_offsets[i],
                                           detail::shift_left_t<size_t>{h_edge_offsets[i]});
-        cub::DeviceSegmentedSort::SortKeys(static_cast<void*>(nullptr),
+        hipcub::DeviceSegmentedSort::SortKeys(static_cast<void*>(nullptr),
                                            tmp_storage_bytes,
                                            edgelist_vertices.begin() + h_edge_offsets[i],
                                            segment_sorted_vertices.begin() + h_edge_offsets[i],
@@ -660,7 +661,7 @@ compute_min_hop_for_unique_label_vertex_pairs(
           d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
         }
 
-        cub::DeviceSegmentedSort::SortKeys(d_tmp_storage.data(),
+        hipcub::DeviceSegmentedSort::SortKeys(d_tmp_storage.data(),
                                            tmp_storage_bytes,
                                            edgelist_vertices.begin() + h_edge_offsets[i],
                                            segment_sorted_vertices.begin() + h_edge_offsets[i],
@@ -711,7 +712,7 @@ compute_min_hop_for_unique_label_vertex_pairs(
       rmm::device_uvector<std::byte> d_tmp_storage(0, handle.get_stream());
       size_t tmp_storage_bytes{0};
 
-      cub::DeviceSegmentedSort::SortKeys(static_cast<void*>(nullptr),
+      hipcub::DeviceSegmentedSort::SortKeys(static_cast<void*>(nullptr),
                                          tmp_storage_bytes,
                                          (*seed_vertices).begin(),
                                          segment_sorted_vertices.begin(),
@@ -725,7 +726,7 @@ compute_min_hop_for_unique_label_vertex_pairs(
         d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
       }
 
-      cub::DeviceSegmentedSort::SortKeys(d_tmp_storage.data(),
+      hipcub::DeviceSegmentedSort::SortKeys(d_tmp_storage.data(),
                                          tmp_storage_bytes,
                                          (*seed_vertices).begin(),
                                          segment_sorted_vertices.begin(),
@@ -1455,7 +1456,7 @@ compute_edge_id_renumber_map(
     rmm::device_uvector<size_t> tmp_indices(edgelist_edge_ids.size(), handle.get_stream());
     thrust::sequence(handle.get_thrust_policy(), tmp_indices.begin(), tmp_indices.end(), size_t{0});
 
-    // cub::DeviceSegmentedSort currently does not suuport thrust::tuple type keys, sorting in
+    // hipcub::DeviceSegmentedSort currently does not suuport thrust::tuple type keys, sorting in
     // chunks still helps in limiting the binary search range and improving memory locality
     for (size_t i = 0; i < num_chunks; ++i) {
       // sort by (label, (type), id, (hop))
@@ -1830,7 +1831,7 @@ renumber_sampled_edgelist(raft::handle_t const& handle,
       auto offset_first =
         thrust::make_transform_iterator((*renumber_map_label_offsets).data() + h_label_offsets[i],
                                         detail::shift_left_t<size_t>{h_edge_offsets[i]});
-      cub::DeviceSegmentedSort::SortPairs(static_cast<void*>(nullptr),
+      hipcub::DeviceSegmentedSort::SortPairs(static_cast<void*>(nullptr),
                                           tmp_storage_bytes,
                                           renumber_map.begin() + h_edge_offsets[i],
                                           segment_sorted_renumber_map.begin() + h_edge_offsets[i],
@@ -1846,7 +1847,7 @@ renumber_sampled_edgelist(raft::handle_t const& handle,
         d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
       }
 
-      cub::DeviceSegmentedSort::SortPairs(d_tmp_storage.data(),
+      hipcub::DeviceSegmentedSort::SortPairs(d_tmp_storage.data(),
                                           tmp_storage_bytes,
                                           renumber_map.begin() + h_edge_offsets[i],
                                           segment_sorted_renumber_map.begin() + h_edge_offsets[i],
@@ -2101,7 +2102,7 @@ heterogeneous_renumber_sampled_edgelist(
       auto offset_first = thrust::make_transform_iterator(
         (*vertex_renumber_map_label_type_offsets).data() + h_label_offsets[i],
         detail::shift_left_t<size_t>{h_edge_offsets[i]});
-      cub::DeviceSegmentedSort::SortPairs(
+      hipcub::DeviceSegmentedSort::SortPairs(
         static_cast<void*>(nullptr),
         tmp_storage_bytes,
         vertex_renumber_map.begin() + h_edge_offsets[i],
@@ -2118,7 +2119,7 @@ heterogeneous_renumber_sampled_edgelist(
         d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
       }
 
-      cub::DeviceSegmentedSort::SortPairs(
+      hipcub::DeviceSegmentedSort::SortPairs(
         d_tmp_storage.data(),
         tmp_storage_bytes,
         vertex_renumber_map.begin() + h_edge_offsets[i],
@@ -2315,7 +2316,7 @@ heterogeneous_renumber_sampled_edgelist(
         auto offset_first = thrust::make_transform_iterator(
           (*edge_id_renumber_map_label_type_offsets).data() + h_label_offsets[i],
           detail::shift_left_t<size_t>{h_edge_offsets[i]});
-        cub::DeviceSegmentedSort::SortPairs(
+        hipcub::DeviceSegmentedSort::SortPairs(
           static_cast<void*>(nullptr),
           tmp_storage_bytes,
           (*edge_id_renumber_map).begin() + h_edge_offsets[i],
@@ -2332,7 +2333,7 @@ heterogeneous_renumber_sampled_edgelist(
           d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
         }
 
-        cub::DeviceSegmentedSort::SortPairs(
+        hipcub::DeviceSegmentedSort::SortPairs(
           d_tmp_storage.data(),
           tmp_storage_bytes,
           (*edge_id_renumber_map).begin() + h_edge_offsets[i],

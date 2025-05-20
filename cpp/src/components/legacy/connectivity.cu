@@ -54,7 +54,7 @@ std::enable_if_t<std::is_signed<VT>::value> connected_components_impl(
   legacy::GraphCSRView<VT, ET, WT> const& graph,
   cugraph_cc_t connectivity_type,
   VT* labels,
-  cudaStream_t stream)
+  hipStream_t stream)
 {
   using ByteT = unsigned char;  // minimum addressable unit
 
@@ -73,7 +73,7 @@ void connected_components(legacy::GraphCSRView<VT, ET, WT> const& graph,
                           cugraph_cc_t connectivity_type,
                           VT* labels)
 {
-  cudaStream_t stream{nullptr};
+  hipStream_t stream{nullptr};
 
   CUGRAPH_EXPECTS(labels != nullptr, "Invalid input argument: labels parameter is NULL");
 

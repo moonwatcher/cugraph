@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2023-2025, NVIDIA CORPORATION.
  *
@@ -61,7 +62,7 @@ namespace cugraph {
 namespace detail {
 
 // FIXME: check if this is still the case
-//  a workaround for cudaErrorInvalidDeviceFunction error when device lambda is used
+//  a workaround for hipErrorInvalidDeviceFunction error when device lambda is used
 template <typename vertex_t, typename weight_t, typename cluster_value_t>
 struct leiden_key_aggregated_edge_op_t {
   weight_t total_edge_weight{};

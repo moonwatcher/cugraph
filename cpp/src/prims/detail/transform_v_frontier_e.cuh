@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2024-2025, NVIDIA CORPORATION.
  *
@@ -294,7 +295,7 @@ __global__ static void transform_v_frontier_e_high_degree(
 
   auto idx = static_cast<size_t>(blockIdx.x);
 
-  using BlockScan = cub::BlockScan<edge_t, transform_v_frontier_e_kernel_block_size>;
+  using BlockScan = hipcub::BlockScan<edge_t, transform_v_frontier_e_kernel_block_size>;
   __shared__ typename BlockScan::TempStorage temp_storage;
   __shared__ edge_t increment;
 

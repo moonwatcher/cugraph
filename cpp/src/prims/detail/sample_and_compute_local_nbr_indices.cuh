@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2024-2025, NVIDIA CORPORATION.
  *
@@ -34,7 +35,7 @@
 
 #include <raft/random/rng.cuh>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/atomic>
 #include <cuda/functional>
 #include <cuda/std/optional>
@@ -289,7 +290,7 @@ __global__ static void compute_valid_local_nbr_count_inclusive_sums_mid_local_de
 
   auto idx = static_cast<size_t>(tid / raft::warp_size());
 
-  using WarpScan = cub::WarpScan<edge_t, raft::warp_size()>;
+  using WarpScan = hipcub::WarpScan<edge_t, raft::warp_size()>;
   __shared__ typename WarpScan::TempStorage temp_storage;
 
   while (idx < frontier_indices.size()) {
@@ -340,7 +341,7 @@ __global__ static void compute_valid_local_nbr_count_inclusive_sums_high_local_d
 
   auto idx = static_cast<size_t>(blockIdx.x);
 
-  using BlockScan = cub::BlockScan<edge_t, sample_and_compute_local_nbr_indices_block_size>;
+  using BlockScan = hipcub::BlockScan<edge_t, sample_and_compute_local_nbr_indices_block_size>;
   __shared__ typename BlockScan::TempStorage temp_storage;
 
   __shared__ edge_t sum;
@@ -1227,7 +1228,7 @@ rmm::device_uvector<edge_t> compute_homogeneous_uniform_sampling_index_without_r
 
         // sort the (sample neighbor index, sample index) pairs (key: sample neighbor index)
 
-        cub::DeviceSegmentedSort::SortPairs(
+        hipcub::DeviceSegmentedSort::SortPairs(
           static_cast<void*>(nullptr),
           tmp_storage_bytes,
           retry_segment_indices ? (*retry_nbr_indices).data() : tmp_nbr_indices.data(),
@@ -1247,7 +1248,7 @@ rmm::device_uvector<edge_t> compute_homogeneous_uniform_sampling_index_without_r
         if (tmp_storage_bytes > d_tmp_storage.size()) {
           d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
         }
-        cub::DeviceSegmentedSort::SortPairs(
+        hipcub::DeviceSegmentedSort::SortPairs(
           d_tmp_storage.data(),
           tmp_storage_bytes,
           retry_segment_indices ? (*retry_nbr_indices).data() : tmp_nbr_indices.data(),
@@ -1375,7 +1376,7 @@ rmm::device_uvector<edge_t> compute_homogeneous_uniform_sampling_index_without_r
 
       // sort the segment-sorted (sample index, sample neighbor index) pairs (key: sample index)
 
-      cub::DeviceSegmentedSort::SortPairs(
+      hipcub::DeviceSegmentedSort::SortPairs(
         static_cast<void*>(nullptr),
         tmp_storage_bytes,
         segment_sorted_tmp_sample_indices.data(),
@@ -1398,7 +1399,7 @@ rmm::device_uvector<edge_t> compute_homogeneous_uniform_sampling_index_without_r
       if (tmp_storage_bytes > d_tmp_storage.size()) {
         d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
       }
-      cub::DeviceSegmentedSort::SortPairs(
+      hipcub::DeviceSegmentedSort::SortPairs(
         d_tmp_storage.data(),
         tmp_storage_bytes,
         segment_sorted_tmp_sample_indices.data(),
@@ -1648,7 +1649,7 @@ rmm::device_uvector<edge_t> compute_heterogeneous_uniform_sampling_index_without
 
         // sort the (sample neighbor index, sample index) pairs (key: sample neighbor index)
 
-        cub::DeviceSegmentedSort::SortPairs(
+        hipcub::DeviceSegmentedSort::SortPairs(
           static_cast<void*>(nullptr),
           tmp_storage_bytes,
           retry_segment_indices ? (*retry_per_type_nbr_indices).data()
@@ -1669,7 +1670,7 @@ rmm::device_uvector<edge_t> compute_heterogeneous_uniform_sampling_index_without
         if (tmp_storage_bytes > d_tmp_storage.size()) {
           d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
         }
-        cub::DeviceSegmentedSort::SortPairs(
+        hipcub::DeviceSegmentedSort::SortPairs(
           d_tmp_storage.data(),
           tmp_storage_bytes,
           retry_segment_indices ? (*retry_per_type_nbr_indices).data()
@@ -1809,7 +1810,7 @@ rmm::device_uvector<edge_t> compute_heterogeneous_uniform_sampling_index_without
       // sort the segment-sorted (sample index, sample per-type neighbor index) pairs (key: sample
       // index)
 
-      cub::DeviceSegmentedSort::SortPairs(
+      hipcub::DeviceSegmentedSort::SortPairs(
         static_cast<void*>(nullptr),
         tmp_storage_bytes,
         segment_sorted_tmp_sample_indices.data(),
@@ -1832,7 +1833,7 @@ rmm::device_uvector<edge_t> compute_heterogeneous_uniform_sampling_index_without
       if (tmp_storage_bytes > d_tmp_storage.size()) {
         d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
       }
-      cub::DeviceSegmentedSort::SortPairs(
+      hipcub::DeviceSegmentedSort::SortPairs(
         d_tmp_storage.data(),
         tmp_storage_bytes,
         segment_sorted_tmp_sample_indices.data(),
@@ -2044,7 +2045,7 @@ void compute_homogeneous_biased_sampling_index_without_replacement(
                                      : input_degree_offsets.begin()) +
           chunk_offsets[i],
         detail::shift_left_t<size_t>{element_offsets[i]});
-      cub::DeviceSegmentedSort::SortPairs(static_cast<void*>(nullptr),
+      hipcub::DeviceSegmentedSort::SortPairs(static_cast<void*>(nullptr),
                                           tmp_storage_bytes,
                                           keys.data(),
                                           segment_sorted_keys.data(),
@@ -2058,7 +2059,7 @@ void compute_homogeneous_biased_sampling_index_without_replacement(
       if (tmp_storage_bytes > d_tmp_storage.size()) {
         d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
       }
-      cub::DeviceSegmentedSort::SortPairs(d_tmp_storage.data(),
+      hipcub::DeviceSegmentedSort::SortPairs(d_tmp_storage.data(),
                                           tmp_storage_bytes,
                                           keys.data(),
                                           segment_sorted_keys.data(),
@@ -2311,7 +2312,7 @@ void compute_heterogeneous_biased_sampling_index_without_replacement(
                                               : input_per_type_degree_offsets.begin()) +
           chunk_offsets[i],
         detail::shift_left_t<size_t>{element_offsets[i]});
-      cub::DeviceSegmentedSort::SortPairs(static_cast<void*>(nullptr),
+      hipcub::DeviceSegmentedSort::SortPairs(static_cast<void*>(nullptr),
                                           tmp_storage_bytes,
                                           keys.data(),
                                           segment_sorted_keys.data(),
@@ -2325,7 +2326,7 @@ void compute_heterogeneous_biased_sampling_index_without_replacement(
       if (tmp_storage_bytes > d_tmp_storage.size()) {
         d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
       }
-      cub::DeviceSegmentedSort::SortPairs(d_tmp_storage.data(),
+      hipcub::DeviceSegmentedSort::SortPairs(d_tmp_storage.data(),
                                           tmp_storage_bytes,
                                           keys.data(),
                                           segment_sorted_keys.data(),
@@ -3909,7 +3910,7 @@ homogeneous_biased_sample_without_replacement(
         high_frontier_nbr_indices.size(), handle.get_stream());
       rmm::device_uvector<bias_t> high_frontier_segment_sorted_keys(high_frontier_keys.size(),
                                                                     handle.get_stream());
-      cub::DeviceSegmentedSort::SortPairs(
+      hipcub::DeviceSegmentedSort::SortPairs(
         static_cast<void*>(nullptr),
         tmp_storage_bytes,
         high_frontier_keys.data(),
@@ -3926,7 +3927,7 @@ homogeneous_biased_sample_without_replacement(
       if (tmp_storage_bytes > d_tmp_storage.size()) {
         d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
       }
-      cub::DeviceSegmentedSort::SortPairs(
+      hipcub::DeviceSegmentedSort::SortPairs(
         d_tmp_storage.data(),
         tmp_storage_bytes,
         high_frontier_keys.data(),
@@ -4663,7 +4664,7 @@ heterogeneous_biased_sample_without_replacement(
           [offsets = raft::device_span<size_t const>(high_frontier_output_offsets.data(),
                                                      high_frontier_output_offsets.size()),
            minor_comm_size] __device__(auto i) { return offsets[i] * minor_comm_size; }));
-      cub::DeviceSegmentedSort::SortPairs(
+      hipcub::DeviceSegmentedSort::SortPairs(
         static_cast<void*>(nullptr),
         tmp_storage_bytes,
         high_frontier_keys.data(),
@@ -4678,7 +4679,7 @@ heterogeneous_biased_sample_without_replacement(
       if (tmp_storage_bytes > d_tmp_storage.size()) {
         d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
       }
-      cub::DeviceSegmentedSort::SortPairs(
+      hipcub::DeviceSegmentedSort::SortPairs(
         d_tmp_storage.data(),
         tmp_storage_bytes,
         high_frontier_keys.data(),
@@ -5246,7 +5247,7 @@ heterogeneous_uniform_sample_and_compute_local_nbr_indices(
       auto offset_first = thrust::make_transform_iterator(
         aggregate_local_frontier_unique_key_local_degree_offsets.data() + h_key_offsets[i],
         detail::shift_left_t<size_t>{h_nbr_offsets[i]});
-      cub::DeviceSegmentedSort::SortPairs(
+      hipcub::DeviceSegmentedSort::SortPairs(
         static_cast<void*>(nullptr),
         tmp_storage_bytes,
         aggregate_local_frontier_unique_key_edge_types.begin() + h_nbr_offsets[i],
@@ -5261,7 +5262,7 @@ heterogeneous_uniform_sample_and_compute_local_nbr_indices(
       if (tmp_storage_bytes > d_tmp_storage.size()) {
         d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
       }
-      cub::DeviceSegmentedSort::SortPairs(
+      hipcub::DeviceSegmentedSort::SortPairs(
         d_tmp_storage.data(),
         tmp_storage_bytes,
         aggregate_local_frontier_unique_key_edge_types.begin() + h_nbr_offsets[i],
@@ -5768,7 +5769,7 @@ heterogeneous_biased_sample_and_compute_local_nbr_indices(
       auto offset_first = thrust::make_transform_iterator(
         aggregate_local_frontier_unique_key_local_degree_offsets.data() + h_key_offsets[i],
         detail::shift_left_t<size_t>{h_nbr_offsets[i]});
-      cub::DeviceSegmentedSort::SortPairs(
+      hipcub::DeviceSegmentedSort::SortPairs(
         static_cast<void*>(nullptr),
         tmp_storage_bytes,
         aggregate_local_frontier_unique_key_edge_types.begin() + h_nbr_offsets[i],
@@ -5783,7 +5784,7 @@ heterogeneous_biased_sample_and_compute_local_nbr_indices(
       if (tmp_storage_bytes > d_tmp_storage.size()) {
         d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
       }
-      cub::DeviceSegmentedSort::SortPairs(
+      hipcub::DeviceSegmentedSort::SortPairs(
         d_tmp_storage.data(),
         tmp_storage_bytes,
         aggregate_local_frontier_unique_key_edge_types.begin() + h_nbr_offsets[i],
