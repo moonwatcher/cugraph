@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2020-2025, NVIDIA CORPORATION.
  *
@@ -44,7 +45,7 @@
 
 #include <rmm/exec_policy.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/functional>
 #include <cuda/std/iterator>
 #include <cuda/std/optional>
@@ -533,7 +534,7 @@ __global__ static void per_v_transform_reduce_e_mid_degree(
   auto const lane_id = tid % raft::warp_size();
   auto idx           = static_cast<size_t>(tid / raft::warp_size());
 
-  using WarpReduce = cub::WarpReduce<
+  using WarpReduce = hipcub::WarpReduce<
     std::conditional_t<std::is_same_v<ReduceOp, reduce_op::any<T>>, int32_t, e_op_result_t>>;
   [[maybe_unused]] __shared__
     std::conditional_t<update_major, typename WarpReduce::TempStorage, std::byte /* dummy */>
@@ -592,7 +593,7 @@ __global__ static void per_v_transform_reduce_e_mid_degree(
 #if CCCL_MAJOR_VERSION >= 3
     using cuda::minimum;
 #else
-    using minimum = cub::Min;
+    using minimum = hipcub::Min;
 #endif
 
     if (edge_partition_e_mask) {
@@ -723,7 +724,7 @@ __global__ static void per_v_transform_reduce_e_high_degree(
 
   auto idx = static_cast<size_t>(blockIdx.x);
 
-  using BlockReduce = cub::BlockReduce<
+  using BlockReduce = hipcub::BlockReduce<
     std::conditional_t<std::is_same_v<ReduceOp, reduce_op::any<T>>, int32_t, e_op_result_t>,
     std::is_same_v<ReduceOp, reduce_op::any<T>>
       ? per_v_transform_reduce_e_kernel_high_degree_reduce_any_block_size
@@ -789,7 +790,7 @@ __global__ static void per_v_transform_reduce_e_high_degree(
 #if CCCL_MAJOR_VERSION >= 3
     using cuda::minimum;
 #else
-    using minimum = cub::Min;
+    using minimum = hipcub::Min;
 #endif
 
     if (edge_partition_e_mask) {
@@ -1640,7 +1641,7 @@ void per_v_transform_reduce_e(raft::handle_t const& handle,
     auto const minor_comm_size = minor_comm.get_size();
 
     int num_gpus_per_node{};
-    RAFT_CUDA_TRY(cudaGetDeviceCount(&num_gpus_per_node));
+    RAFT_CUDA_TRY(hipGetDeviceCount(&num_gpus_per_node));
     if (comm_size <= num_gpus_per_node) {
       subgroup_size = minor_comm_size;
     } else {

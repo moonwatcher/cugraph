@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2020-2025, NVIDIA CORPORATION.
  *
@@ -39,7 +40,7 @@
 #include <rmm/mr/device/per_device_resource.hpp>
 #include <rmm/mr/device/polymorphic_allocator.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/std/iterator>
 #include <cuda/std/optional>
 #include <thrust/copy.h>
@@ -63,7 +64,7 @@ namespace cugraph {
 
 namespace detail {
 
-// a workaround for cudaErrorInvalidDeviceFunction error when device lambda is used
+// a workaround for hipErrorInvalidDeviceFunction error when device lambda is used
 template <typename EdgePartitionDstKeyInputWrapper>
 struct minor_to_key_t {
   using vertex_t = typename EdgePartitionDstKeyInputWrapper::value_type;
@@ -75,14 +76,14 @@ struct minor_to_key_t {
   }
 };
 
-// a workaround for cudaErrorInvalidDeviceFunction error when device lambda is used
+// a workaround for hipErrorInvalidDeviceFunction error when device lambda is used
 template <typename edge_t>
 struct rebase_offset_t {
   edge_t base_offset{};
   __device__ edge_t operator()(edge_t offset) const { return offset - base_offset; }
 };
 
-// a workaround for cudaErrorInvalidDeviceFunction error when device lambda is used
+// a workaround for hipErrorInvalidDeviceFunction error when device lambda is used
 template <typename vertex_t, typename edge_value_t>
 struct tuple_to_minor_comm_rank_t {
   compute_vertex_partition_id_from_ext_vertex_t<vertex_t> key_func{};
@@ -104,7 +105,7 @@ struct tuple_to_minor_comm_rank_t {
   }
 };
 
-// a workaround for cudaErrorInvalidDeviceFunction error when device lambda is used
+// a workaround for hipErrorInvalidDeviceFunction error when device lambda is used
 template <typename vertex_t>
 struct pair_to_binary_partition_id_t {
   __device__ bool operator()(thrust::tuple<vertex_t, vertex_t> pair) const
@@ -113,7 +114,7 @@ struct pair_to_binary_partition_id_t {
   }
 };
 
-// a workaround for cudaErrorInvalidDeviceFunction error when device lambda is used
+// a workaround for hipErrorInvalidDeviceFunction error when device lambda is used
 template <typename vertex_t,
           typename edge_value_t,
           typename e_op_result_t,
@@ -160,13 +161,13 @@ struct call_key_aggregated_e_op_t {
   }
 };
 
-// a workaround for cudaErrorInvalidDeviceFunction error when device lambda is used
+// a workaround for hipErrorInvalidDeviceFunction error when device lambda is used
 template <typename vertex_t>
 struct is_valid_vertex_t {
   __device__ bool operator()(vertex_t v) const { return v != invalid_vertex_id<vertex_t>::value; }
 };
 
-// a workaround for cudaErrorInvalidDeviceFunction error when device lambda is used
+// a workaround for hipErrorInvalidDeviceFunction error when device lambda is used
 template <typename vertex_t>
 struct invalidate_if_not_first_in_run_t {
   vertex_t const* majors{nullptr};
@@ -177,7 +178,7 @@ struct invalidate_if_not_first_in_run_t {
   }
 };
 
-// a workaround for cudaErrorInvalidDeviceFunction error when device lambda is used
+// a workaround for hipErrorInvalidDeviceFunction error when device lambda is used
 template <typename vertex_t, bool multi_gpu>
 struct vertex_local_offset_t {
   vertex_partition_device_view_t<vertex_t, multi_gpu> vertex_partition{};
@@ -187,7 +188,7 @@ struct vertex_local_offset_t {
   }
 };
 
-// a workaround for cudaErrorInvalidDeviceFunction error when device lambda is used
+// a workaround for hipErrorInvalidDeviceFunction error when device lambda is used
 template <typename ReduceOp, typename T>
 struct reduce_with_init_t {
   ReduceOp reduce_op{};
@@ -507,7 +508,7 @@ void per_v_transform_reduce_dst_key_aggregated_outgoing_e(
             h_vertex_offsets[j],
           detail::rebase_offset_t<edge_t>{h_edge_offsets[j]});
         if constexpr (!std::is_same_v<edge_value_t, cuda::std::nullopt_t>) {
-          cub::DeviceSegmentedSort::SortPairs(
+          hipcub::DeviceSegmentedSort::SortPairs(
             static_cast<void*>(nullptr),
             tmp_storage_bytes,
             tmp_minor_keys.begin() + h_edge_offsets[j],
@@ -524,7 +525,7 @@ void per_v_transform_reduce_dst_key_aggregated_outgoing_e(
             offset_first + 1,
             handle.get_stream());
         } else {
-          cub::DeviceSegmentedSort::SortKeys(static_cast<void*>(nullptr),
+          hipcub::DeviceSegmentedSort::SortKeys(static_cast<void*>(nullptr),
                                              tmp_storage_bytes,
                                              tmp_minor_keys.begin() + h_edge_offsets[j],
                                              unreduced_minor_keys.begin(),
@@ -538,7 +539,7 @@ void per_v_transform_reduce_dst_key_aggregated_outgoing_e(
           d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
         }
         if constexpr (!std::is_same_v<edge_value_t, cuda::std::nullopt_t>) {
-          cub::DeviceSegmentedSort::SortPairs(
+          hipcub::DeviceSegmentedSort::SortPairs(
             d_tmp_storage.data(),
             tmp_storage_bytes,
             tmp_minor_keys.begin() + h_edge_offsets[j],
@@ -555,7 +556,7 @@ void per_v_transform_reduce_dst_key_aggregated_outgoing_e(
             offset_first + 1,
             handle.get_stream());
         } else {
-          cub::DeviceSegmentedSort::SortKeys(d_tmp_storage.data(),
+          hipcub::DeviceSegmentedSort::SortKeys(d_tmp_storage.data(),
                                              tmp_storage_bytes,
                                              tmp_minor_keys.begin() + h_edge_offsets[j],
                                              unreduced_minor_keys.begin(),

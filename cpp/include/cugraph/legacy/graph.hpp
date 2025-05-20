@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2020-2025, NVIDIA CORPORATION.
  *
@@ -368,7 +369,7 @@ class GraphCOO {
   GraphCOO(vertex_t number_of_vertices,
            edge_t number_of_edges,
            bool has_data                     = false,
-           cudaStream_t stream               = nullptr,
+           hipStream_t stream               = nullptr,
            rmm::device_async_resource_ref mr = rmm::mr::get_current_device_resource())
     : number_of_vertices_p(number_of_vertices),
       number_of_edges_p(number_of_edges),
@@ -379,7 +380,7 @@ class GraphCOO {
   }
 
   GraphCOO(GraphCOOView<vertex_t, edge_t, weight_t> const& graph,
-           cudaStream_t stream               = nullptr,
+           hipStream_t stream               = nullptr,
            rmm::device_async_resource_ref mr = rmm::mr::get_current_device_resource())
     : number_of_vertices_p(graph.number_of_vertices),
       number_of_edges_p(graph.number_of_edges),
@@ -476,7 +477,7 @@ class GraphCompressedSparseBase {
   GraphCompressedSparseBase(vertex_t number_of_vertices,
                             edge_t number_of_edges,
                             bool has_data,
-                            cudaStream_t stream,
+                            hipStream_t stream,
                             rmm::device_async_resource_ref mr)
     : number_of_vertices_p(number_of_vertices),
       number_of_edges_p(number_of_edges),
@@ -550,7 +551,7 @@ class GraphCSR : public GraphCompressedSparseBase<vertex_t, edge_t, weight_t> {
   GraphCSR(vertex_t number_of_vertices_,
            edge_t number_of_edges_,
            bool has_data_                    = false,
-           cudaStream_t stream               = nullptr,
+           hipStream_t stream               = nullptr,
            rmm::device_async_resource_ref mr = rmm::mr::get_current_device_resource())
     : GraphCompressedSparseBase<vertex_t, edge_t, weight_t>(
         number_of_vertices_, number_of_edges_, has_data_, stream, mr)

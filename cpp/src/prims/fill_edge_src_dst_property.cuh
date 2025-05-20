@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2022-2025, NVIDIA CORPORATION.
  *
@@ -581,7 +582,7 @@ void fill_edge_minor_property(raft::handle_t const& handle,
     }
 
     for (size_t i = 0; i < static_cast<size_t>(major_comm_size); i += num_concurrent_bcasts) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());
+      RAFT_CUDA_TRY(hipDeviceSynchronize());
       auto sub0       = std::chrono::steady_clock::now();
       auto loop_count = std::min(num_concurrent_bcasts, static_cast<size_t>(major_comm_size) - i);
 

@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2020-2025, NVIDIA CORPORATION.
  *
@@ -976,7 +977,7 @@ auto shuffle_values(
                     stream_view);
   raft::update_host(
     rx_aligned_counts.data(), d_rx_aligned_counts.data(), d_rx_aligned_counts.size(), stream_view);
-  RAFT_CUDA_TRY(cudaStreamSynchronize(stream_view));
+  RAFT_CUDA_TRY(hipStreamSynchronize(stream_view));
   size_t offset{0};
   for (size_t i = 0; i < rx_counts.size(); ++i) {
     auto target_alignment = (alignment - rx_unaligned_counts[i]) % alignment;

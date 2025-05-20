@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2020-2025, NVIDIA CORPORATION.
  *
@@ -184,14 +185,14 @@ void barnes_hut(raft::handle_t const& handle,
   //
   // Set cache levels for faster algorithm execution
   //---------------------------------------------------
-  cudaFuncSetCacheConfig(BoundingBoxKernel, cudaFuncCachePreferShared);
-  cudaFuncSetCacheConfig(TreeBuildingKernel, cudaFuncCachePreferL1);
-  cudaFuncSetCacheConfig(ClearKernel1, cudaFuncCachePreferL1);
-  cudaFuncSetCacheConfig(ClearKernel2, cudaFuncCachePreferL1);
-  cudaFuncSetCacheConfig(SummarizationKernel, cudaFuncCachePreferShared);
-  cudaFuncSetCacheConfig(SortKernel, cudaFuncCachePreferL1);
-  cudaFuncSetCacheConfig(RepulsionKernel, cudaFuncCachePreferL1);
-  cudaFuncSetCacheConfig(apply_forces_bh, cudaFuncCachePreferL1);
+  hipFuncSetCacheConfig(reinterpret_cast<const void*>(BoundingBoxKernel), hipFuncCachePreferShared);
+  hipFuncSetCacheConfig(reinterpret_cast<const void*>(TreeBuildingKernel), hipFuncCachePreferL1);
+  hipFuncSetCacheConfig(reinterpret_cast<const void*>(ClearKernel1), hipFuncCachePreferL1);
+  hipFuncSetCacheConfig(reinterpret_cast<const void*>(ClearKernel2), hipFuncCachePreferL1);
+  hipFuncSetCacheConfig(reinterpret_cast<const void*>(SummarizationKernel), hipFuncCachePreferShared);
+  hipFuncSetCacheConfig(reinterpret_cast<const void*>(SortKernel), hipFuncCachePreferL1);
+  hipFuncSetCacheConfig(reinterpret_cast<const void*>(RepulsionKernel), hipFuncCachePreferL1);
+  hipFuncSetCacheConfig(reinterpret_cast<const void*>(apply_forces_bh), hipFuncCachePreferL1);
 
   if (callback) {
     callback->setup<float>(nnodes + 1, 2);

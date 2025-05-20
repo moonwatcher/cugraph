@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2020-2025, NVIDIA CORPORATION.
  *
@@ -30,7 +31,7 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/std/iterator>
 #include <thrust/fill.h>
 #include <thrust/for_each.h>
@@ -420,7 +421,7 @@ void sort_adjacency_list(raft::handle_t const& handle,
       size_t tmp_storage_bytes{0};
       auto offset_first = thrust::make_transform_iterator(offsets.data() + h_vertex_offsets[i],
                                                           shift_left_t<edge_t>{h_edge_offsets[i]});
-      cub::DeviceSegmentedSort::SortPairs(static_cast<void*>(nullptr),
+      hipcub::DeviceSegmentedSort::SortPairs(static_cast<void*>(nullptr),
                                           tmp_storage_bytes,
                                           index_first + h_edge_offsets[i],
                                           segment_sorted_indices.data(),
@@ -434,7 +435,7 @@ void sort_adjacency_list(raft::handle_t const& handle,
       if (tmp_storage_bytes > d_tmp_storage.size()) {
         d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
       }
-      cub::DeviceSegmentedSort::SortPairs(d_tmp_storage.data(),
+      hipcub::DeviceSegmentedSort::SortPairs(d_tmp_storage.data(),
                                           tmp_storage_bytes,
                                           index_first + h_edge_offsets[i],
                                           segment_sorted_indices.data(),
@@ -468,7 +469,7 @@ void sort_adjacency_list(raft::handle_t const& handle,
       size_t tmp_storage_bytes{0};
       auto offset_first = thrust::make_transform_iterator(offsets.data() + h_vertex_offsets[i],
                                                           shift_left_t<edge_t>{h_edge_offsets[i]});
-      cub::DeviceSegmentedSort::SortPairs(static_cast<void*>(nullptr),
+      hipcub::DeviceSegmentedSort::SortPairs(static_cast<void*>(nullptr),
                                           tmp_storage_bytes,
                                           index_first + h_edge_offsets[i],
                                           segment_sorted_indices.data(),
@@ -482,7 +483,7 @@ void sort_adjacency_list(raft::handle_t const& handle,
       if (tmp_storage_bytes > d_tmp_storage.size()) {
         d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
       }
-      cub::DeviceSegmentedSort::SortPairs(d_tmp_storage.data(),
+      hipcub::DeviceSegmentedSort::SortPairs(d_tmp_storage.data(),
                                           tmp_storage_bytes,
                                           index_first + h_edge_offsets[i],
                                           segment_sorted_indices.data(),
@@ -548,7 +549,7 @@ void sort_adjacency_list(raft::handle_t const& handle,
     size_t tmp_storage_bytes{0};
     auto offset_first = thrust::make_transform_iterator(offsets.data() + h_vertex_offsets[i],
                                                         shift_left_t<edge_t>{h_edge_offsets[i]});
-    cub::DeviceSegmentedSort::SortKeys(static_cast<void*>(nullptr),
+    hipcub::DeviceSegmentedSort::SortKeys(static_cast<void*>(nullptr),
                                        tmp_storage_bytes,
                                        index_first + h_edge_offsets[i],
                                        segment_sorted_indices.data(),
@@ -560,7 +561,7 @@ void sort_adjacency_list(raft::handle_t const& handle,
     if (tmp_storage_bytes > d_tmp_storage.size()) {
       d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
     }
-    cub::DeviceSegmentedSort::SortKeys(d_tmp_storage.data(),
+    hipcub::DeviceSegmentedSort::SortKeys(d_tmp_storage.data(),
                                        tmp_storage_bytes,
                                        index_first + h_edge_offsets[i],
                                        segment_sorted_indices.data(),

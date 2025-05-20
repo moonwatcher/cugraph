@@ -20,7 +20,7 @@
 
 #include <raft/util/cudart_utils.hpp>
 
-#include <cuda_runtime.h>
+#include <hip/hip_runtime.h>
 
 #include <execinfo.h>
 
@@ -92,9 +92,9 @@ class Exception : public std::exception {
  * @param stream cuda stream
  */
 template <typename Type>
-void copy(Type* dst, const Type* src, size_t len, cudaStream_t stream)
+void copy(Type* dst, const Type* src, size_t len, hipStream_t stream)
 {
-  RAFT_CUDA_TRY(cudaMemcpyAsync(dst, src, len * sizeof(Type), cudaMemcpyDefault, stream));
+  RAFT_CUDA_TRY(hipMemcpyAsync(dst, src, len * sizeof(Type), hipMemcpyDefault, stream));
 }
 
 /**
@@ -105,23 +105,23 @@ void copy(Type* dst, const Type* src, size_t len, cudaStream_t stream)
  */
 /** performs a host to device copy */
 template <typename Type>
-void updateDevice(Type* dPtr, const Type* hPtr, size_t len, cudaStream_t stream)
+void updateDevice(Type* dPtr, const Type* hPtr, size_t len, hipStream_t stream)
 {
   copy(dPtr, hPtr, len, stream);
 }
 
 /** performs a device to host copy */
 template <typename Type>
-void updateHost(Type* hPtr, const Type* dPtr, size_t len, cudaStream_t stream)
+void updateHost(Type* hPtr, const Type* dPtr, size_t len, hipStream_t stream)
 {
   copy(hPtr, dPtr, len, stream);
 }
 
 template <typename Type>
-void copyAsync(Type* dPtr1, const Type* dPtr2, size_t len, cudaStream_t stream)
+void copyAsync(Type* dPtr1, const Type* dPtr2, size_t len, hipStream_t stream)
 {
   RAFT_CUDA_TRY(
-    cudaMemcpyAsync(dPtr1, dPtr2, len * sizeof(Type), cudaMemcpyDeviceToDevice, stream));
+    hipMemcpyAsync(dPtr1, dPtr2, len * sizeof(Type), hipMemcpyDeviceToDevice, stream));
 }
 /** @} */
 
@@ -193,7 +193,7 @@ void myPrintDevVector(const char* variableName,
 {
   std::vector<T> hostMem(componentsCount);
   RAFT_CUDA_TRY(
-    cudaMemcpy(hostMem.data(), devMem, componentsCount * sizeof(T), cudaMemcpyDeviceToHost));
+    hipMemcpy(hostMem.data(), devMem, componentsCount * sizeof(T), hipMemcpyDeviceToHost));
   myPrintHostVector(variableName, hostMem.data(), componentsCount, out);
 }
 

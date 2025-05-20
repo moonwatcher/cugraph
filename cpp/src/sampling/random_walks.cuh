@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2021-2025, NVIDIA CORPORATION.
  *
@@ -907,10 +908,10 @@ struct coo_convertor_t {
       handle_.get_thrust_policy(), d_sizes.begin(), d_sizes.end(), d_scan.begin());
 
     index_t total_sz{0};
-    RAFT_CUDA_TRY(cudaMemcpy(&total_sz,
+    RAFT_CUDA_TRY(hipMemcpy(&total_sz,
                              original::raw_ptr(d_scan) + num_paths_ - 1,
                              sizeof(index_t),
-                             cudaMemcpyDeviceToHost));
+                             hipMemcpyDeviceToHost));
 
     original::device_vec_t<int> d_stencil(total_sz, handle_.get_stream());
 
@@ -1039,7 +1040,7 @@ std::
   //
   size_t free_mem_sp_bytes{0};
   size_t total_mem_sp_bytes{0};
-  cudaMemGetInfo(&free_mem_sp_bytes, &total_mem_sp_bytes);
+  hipMemGetInfo(&free_mem_sp_bytes, &total_mem_sp_bytes);
 
   // GPU memory requirements:
   //

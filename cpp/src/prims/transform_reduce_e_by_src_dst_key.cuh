@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2020-2025, NVIDIA CORPORATION.
  *
@@ -300,7 +301,7 @@ __global__ static void transform_reduce_by_src_dst_key_mid_degree(
     static_cast<size_t>(major_range_first - edge_partition.major_range_first());
   size_t idx = static_cast<size_t>(tid / raft::warp_size());
 
-  using WarpScan = cub::WarpScan<edge_t, raft::warp_size()>;
+  using WarpScan = hipcub::WarpScan<edge_t, raft::warp_size()>;
   __shared__ typename WarpScan::TempStorage temp_storage;
 
   while (idx < static_cast<size_t>(major_range_last - major_range_first)) {
@@ -396,7 +397,7 @@ __global__ static void transform_reduce_by_src_dst_key_high_degree(
     static_cast<size_t>(major_range_first - edge_partition.major_range_first());
   auto idx = static_cast<size_t>(blockIdx.x);
 
-  using BlockScan = cub::BlockScan<edge_t, transform_reduce_e_by_src_dst_key_kernel_block_size>;
+  using BlockScan = hipcub::BlockScan<edge_t, transform_reduce_e_by_src_dst_key_kernel_block_size>;
   __shared__ typename BlockScan::TempStorage temp_storage;
 
   while (idx < static_cast<size_t>(major_range_last - major_range_first)) {
@@ -465,7 +466,7 @@ std::tuple<rmm::device_uvector<vertex_t>, BufferType> reduce_to_unique_kv_pairs(
   rmm::device_uvector<vertex_t>&& keys,
   BufferType&& value_buffer,
   ReduceOp reduce_op,
-  cudaStream_t stream)
+  hipStream_t stream)
 {
   thrust::sort_by_key(
     rmm::exec_policy(stream), keys.begin(), keys.end(), get_dataframe_buffer_begin(value_buffer));
@@ -501,7 +502,7 @@ template <bool edge_src_key,
           typename ReduceOp,
           typename T>
 std::tuple<rmm::device_uvector<typename GraphViewType::vertex_type>,
-           decltype(allocate_dataframe_buffer<T>(0, cudaStream_t{nullptr}))>
+           decltype(allocate_dataframe_buffer<T>(0, hipStream_t{nullptr}))>
 transform_reduce_e_by_src_dst_key(raft::handle_t const& handle,
                                   GraphViewType const& graph_view,
                                   EdgeSrcValueInputWrapper edge_src_value_input,

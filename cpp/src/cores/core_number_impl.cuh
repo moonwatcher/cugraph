@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2020-2025, NVIDIA CORPORATION.
  *
@@ -48,7 +49,7 @@ namespace cugraph {
 
 namespace {
 
-// a workaround for cudaErrorInvalidDeviceFunction error when device lambda is used
+// a workaround for hipErrorInvalidDeviceFunction error when device lambda is used
 template <typename vertex_t, typename edge_t>
 struct v_to_core_number_t {
   edge_t const* core_numbers{nullptr};
@@ -57,7 +58,7 @@ struct v_to_core_number_t {
   __device__ edge_t operator()(vertex_t v) const { return core_numbers[v - v_first]; }
 };
 
-// a workaround for cudaErrorInvalidDeviceFunction error when device lambda is used
+// a workaround for hipErrorInvalidDeviceFunction error when device lambda is used
 template <typename edge_t>
 struct mult_degree_by_two_t {
   __device__ edge_t operator()(edge_t d) const { return d * edge_t{2}; }

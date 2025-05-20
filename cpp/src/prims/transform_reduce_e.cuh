@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2020-2025, NVIDIA CORPORATION.
  *
@@ -83,7 +84,7 @@ __global__ static void transform_reduce_e_hypersparse(
 
   auto dcs_nzd_vertex_count = *(edge_partition.dcs_nzd_vertex_count());
 
-  using BlockReduce = cub::BlockReduce<e_op_result_t, transform_reduce_e_kernel_block_size>;
+  using BlockReduce = hipcub::BlockReduce<e_op_result_t, transform_reduce_e_kernel_block_size>;
   __shared__ typename BlockReduce::TempStorage temp_storage;
 
   property_op<e_op_result_t, thrust::plus> edge_property_add{};
@@ -175,7 +176,7 @@ __global__ static void transform_reduce_e_low_degree(
     static_cast<size_t>(major_range_first - edge_partition.major_range_first());
   size_t idx = static_cast<size_t>(tid);
 
-  using BlockReduce = cub::BlockReduce<e_op_result_t, transform_reduce_e_kernel_block_size>;
+  using BlockReduce = hipcub::BlockReduce<e_op_result_t, transform_reduce_e_kernel_block_size>;
   __shared__ typename BlockReduce::TempStorage temp_storage;
 
   property_op<e_op_result_t, thrust::plus> edge_property_add{};
@@ -266,7 +267,7 @@ __global__ static void transform_reduce_e_mid_degree(
     static_cast<size_t>(major_range_first - edge_partition.major_range_first());
   size_t idx = static_cast<size_t>(tid / raft::warp_size());
 
-  using BlockReduce = cub::BlockReduce<e_op_result_t, transform_reduce_e_kernel_block_size>;
+  using BlockReduce = hipcub::BlockReduce<e_op_result_t, transform_reduce_e_kernel_block_size>;
   __shared__ typename BlockReduce::TempStorage temp_storage;
   property_op<e_op_result_t, thrust::plus> edge_property_add{};
   e_op_result_t e_op_result_sum{};
@@ -341,7 +342,7 @@ __global__ static void transform_reduce_e_high_degree(
     static_cast<size_t>(major_range_first - edge_partition.major_range_first());
   size_t idx = static_cast<size_t>(blockIdx.x);
 
-  using BlockReduce = cub::BlockReduce<e_op_result_t, transform_reduce_e_kernel_block_size>;
+  using BlockReduce = hipcub::BlockReduce<e_op_result_t, transform_reduce_e_kernel_block_size>;
   __shared__ typename BlockReduce::TempStorage temp_storage;
   property_op<e_op_result_t, thrust::plus> edge_property_add{};
   e_op_result_t e_op_result_sum{};

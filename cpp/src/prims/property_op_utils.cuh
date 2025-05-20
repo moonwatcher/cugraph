@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2020-2025, NVIDIA CORPORATION.
  *
@@ -21,7 +22,7 @@
 #include <raft/core/comms.hpp>
 #include <raft/core/device_span.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <thrust/detail/type_traits/iterator/is_discard_iterator.h>
 #include <thrust/functional.h>
 #include <thrust/iterator/detail/any_assign.h>

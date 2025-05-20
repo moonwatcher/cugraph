@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2019-2024, NVIDIA CORPORATION.
  *
@@ -75,28 +76,28 @@ VT sort(legacy::GraphCOOView<VT, ET, WT>& graph, rmm::cuda_stream_view stream_vi
       graph.dst_indices,
       graph.dst_indices + graph.number_of_edges,
       thrust::make_zip_iterator(thrust::make_tuple(graph.src_indices, graph.edge_data)));
-    RAFT_CUDA_TRY(cudaMemcpy(
-      &max_dst_id, &(graph.dst_indices[graph.number_of_edges - 1]), sizeof(VT), cudaMemcpyDefault));
+    RAFT_CUDA_TRY(hipMemcpy(
+      &max_dst_id, &(graph.dst_indices[graph.number_of_edges - 1]), sizeof(VT), hipMemcpyDefault));
     thrust::stable_sort_by_key(
       rmm::exec_policy(stream_view),
       graph.src_indices,
       graph.src_indices + graph.number_of_edges,
       thrust::make_zip_iterator(thrust::make_tuple(graph.dst_indices, graph.edge_data)));
-    RAFT_CUDA_TRY(cudaMemcpy(
-      &max_src_id, &(graph.src_indices[graph.number_of_edges - 1]), sizeof(VT), cudaMemcpyDefault));
+    RAFT_CUDA_TRY(hipMemcpy(
+      &max_src_id, &(graph.src_indices[graph.number_of_edges - 1]), sizeof(VT), hipMemcpyDefault));
   } else {
     thrust::stable_sort_by_key(rmm::exec_policy(stream_view),
                                graph.dst_indices,
                                graph.dst_indices + graph.number_of_edges,
                                graph.src_indices);
-    RAFT_CUDA_TRY(cudaMemcpy(
-      &max_dst_id, &(graph.dst_indices[graph.number_of_edges - 1]), sizeof(VT), cudaMemcpyDefault));
+    RAFT_CUDA_TRY(hipMemcpy(
+      &max_dst_id, &(graph.dst_indices[graph.number_of_edges - 1]), sizeof(VT), hipMemcpyDefault));
     thrust::stable_sort_by_key(rmm::exec_policy(stream_view),
                                graph.src_indices,
                                graph.src_indices + graph.number_of_edges,
                                graph.dst_indices);
-    RAFT_CUDA_TRY(cudaMemcpy(
-      &max_src_id, &(graph.src_indices[graph.number_of_edges - 1]), sizeof(VT), cudaMemcpyDefault));
+    RAFT_CUDA_TRY(hipMemcpy(
+      &max_src_id, &(graph.src_indices[graph.number_of_edges - 1]), sizeof(VT), hipMemcpyDefault));
   }
   return std::max(max_src_id, max_dst_id) + 1;
 }
@@ -183,11 +184,11 @@ void coo_to_csr_inplace(legacy::GraphCOOView<VT, ET, WT>& graph,
                       graph.number_of_edges,
                       stream_view);
 
-  RAFT_CUDA_TRY(cudaMemcpy(
-    result.indices, graph.dst_indices, sizeof(VT) * graph.number_of_edges, cudaMemcpyDefault));
+  RAFT_CUDA_TRY(hipMemcpy(
+    result.indices, graph.dst_indices, sizeof(VT) * graph.number_of_edges, hipMemcpyDefault));
   if (graph.has_data())
-    RAFT_CUDA_TRY(cudaMemcpy(
-      result.edge_data, graph.edge_data, sizeof(WT) * graph.number_of_edges, cudaMemcpyDefault));
+    RAFT_CUDA_TRY(hipMemcpy(
+      result.edge_data, graph.edge_data, sizeof(WT) * graph.number_of_edges, hipMemcpyDefault));
 }
 
 // Explicit Instantiation Declarations (EIDecl)
