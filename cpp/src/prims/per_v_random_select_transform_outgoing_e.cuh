@@ -60,7 +60,7 @@ template <typename GraphViewType,
           typename EdgeValueInputWrapper,
           typename key_t>
 struct constant_bias_e_op_t {
-  __device__ float operator()(key_t,
+  __host__ __device__ float operator()(key_t,
                               typename GraphViewType::vertex_type,
                               typename EdgeSrcValueInputWrapper::value_type,
                               typename EdgeDstValueInputWrapper::value_type,

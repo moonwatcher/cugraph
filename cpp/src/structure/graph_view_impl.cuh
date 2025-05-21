@@ -773,7 +773,7 @@ edge_t graph_view_t<vertex_t, edge_t, store_transposed, multi_gpu, std::enable_i
     edge_src_dummy_property_t{}.view(),
     edge_dst_dummy_property_t{}.view(),
     edge_dummy_property_t{}.view(),
-    [] __device__(vertex_t src, vertex_t dst, auto, auto, auto) { return src == dst; });
+    [] __host__ __device__(vertex_t src, vertex_t dst, auto, auto, auto) { return src == dst; });
 }
 
 template <typename vertex_t, typename edge_t, bool store_transposed, bool multi_gpu>

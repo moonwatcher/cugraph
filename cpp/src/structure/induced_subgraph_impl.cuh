@@ -59,7 +59,7 @@ namespace detail {
 
 template <typename vertex_t, typename weight_t, typename property_t>
 struct induced_subgraph_weighted_edge_op {
-  thrust::tuple<vertex_t, vertex_t, weight_t, size_t> __device__
+  thrust::tuple<vertex_t, vertex_t, weight_t, size_t> __host__ __device__
   operator()(thrust::tuple<vertex_t, size_t> tagged_src,
              vertex_t dst,
              property_t sv,
@@ -92,7 +92,7 @@ struct induced_subgraph_weighted_pred_op {
 
 template <typename vertex_t, typename property_t>
 struct induced_subgraph_unweighted_edge_op {
-  thrust::tuple<vertex_t, vertex_t, size_t> __device__
+  thrust::tuple<vertex_t, vertex_t, size_t> __host__ __device__
   operator()(thrust::tuple<vertex_t, size_t> tagged_src,
              vertex_t dst,
              property_t sv,

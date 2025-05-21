@@ -523,7 +523,7 @@ EdgeTypeAndIdToSrcDstLookupContainerType build_edge_id_and_type_to_src_dst_looku
       cugraph::edge_dst_dummy_property_t{}.view(),
       edge_type_view,
       cuda::proclaim_return_type<edge_type_t>(
-        [] __device__(auto, auto, cuda::std::nullopt_t, cuda::std::nullopt_t, edge_type_t et) {
+        [] __host__ __device__(auto, auto, cuda::std::nullopt_t, cuda::std::nullopt_t, edge_type_t et) {
           return et;
         }));
 
