@@ -120,7 +120,7 @@ struct extract_low_to_high_degree_edges_from_endpoints_t {
   raft::device_span<vertex_t const> srcs{};
   raft::device_span<vertex_t const> dsts{};
   raft::device_span<edge_t const> count{};
-  __device__ cuda::std::optional<thrust::tuple<vertex_t, vertex_t, edge_t>> operator()(
+  __host__ __device__ cuda::std::optional<thrust::tuple<vertex_t, vertex_t, edge_t>> operator()(
     vertex_t src,
     vertex_t dst,
     edge_t src_out_degree,
