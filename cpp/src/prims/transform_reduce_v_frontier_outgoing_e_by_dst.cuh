@@ -87,7 +87,7 @@ template <typename key_t,
 struct transform_reduce_v_frontier_call_e_op_t {
   EdgeOp e_op{};
 
-  __device__ cuda::std::optional<
+  __host__ __device__ cuda::std::optional<
     std::conditional_t<!std::is_same_v<key_t, void> && !std::is_same_v<payload_t, void>,
                        thrust::tuple<key_t, payload_t>,
                        std::conditional_t<!std::is_same_v<key_t, void>, key_t, payload_t>>>

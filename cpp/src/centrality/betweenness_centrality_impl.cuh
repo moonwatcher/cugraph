@@ -66,7 +66,7 @@ struct extract_edge_e_op_t {
   vertex_t d{};
 
   template <typename edge_t, typename weight_t>
-  __device__ cuda::std::optional<thrust::tuple<vertex_t, vertex_t>> operator()(
+  __host__ __device__ cuda::std::optional<thrust::tuple<vertex_t, vertex_t>> operator()(
     vertex_t src,
     vertex_t dst,
     thrust::tuple<vertex_t, edge_t, weight_t> src_props,

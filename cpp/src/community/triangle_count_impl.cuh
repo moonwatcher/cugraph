@@ -64,7 +64,7 @@ struct is_two_or_greater_t {
 
 template <typename vertex_t, typename edge_t>
 struct extract_low_to_high_degree_edges_t {
-  __device__ cuda::std::optional<thrust::tuple<vertex_t, vertex_t>> operator()(
+  __host__ __device__ cuda::std::optional<thrust::tuple<vertex_t, vertex_t>> operator()(
     vertex_t src,
     vertex_t dst,
     edge_t src_out_degree,

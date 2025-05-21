@@ -49,7 +49,7 @@ std::tuple<size_t, size_t> check_edge_bias_values(
                edge_src_dummy_property_t{}.view(),
                edge_dst_dummy_property_t{}.view(),
                edge_bias_view,
-               [] __device__(vertex_t, vertex_t, auto, auto, bias_t b) { return b < 0.0; });
+               [] __host__ __device__(vertex_t, vertex_t, auto, auto, bias_t b) { return b < 0.0; });
 
   size_t num_overflows{0};
   {

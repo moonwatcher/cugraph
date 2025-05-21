@@ -48,7 +48,7 @@ namespace cugraph {
 template <typename vertex_t, typename edge_t>
 struct extract_weak_edges {
   edge_t k{};
-  __device__ cuda::std::optional<thrust::tuple<vertex_t, vertex_t>> operator()(
+  __host__ __device__ cuda::std::optional<thrust::tuple<vertex_t, vertex_t>> operator()(
     vertex_t src, vertex_t dst, cuda::std::nullopt_t, cuda::std::nullopt_t, edge_t count) const
   {
     // No need to process edges with count == 0

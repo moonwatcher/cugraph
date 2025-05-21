@@ -64,7 +64,7 @@ struct induced_subgraph_weighted_edge_op {
   raft::device_span<size_t const> dst_subgraph_offsets;
   raft::device_span<vertex_t const> dst_subgraph_vertices;
 
-  return_type __device__ operator()(thrust::tuple<vertex_t, size_t> tagged_src,
+  return_type __host__ __device__ operator()(thrust::tuple<vertex_t, size_t> tagged_src,
                                     vertex_t dst,
                                     property_t sv,
                                     property_t dv,
@@ -88,7 +88,7 @@ struct induced_subgraph_unweighted_edge_op {
   raft::device_span<size_t const> dst_subgraph_offsets;
   raft::device_span<vertex_t const> dst_subgraph_vertices;
 
-  return_type __device__ operator()(thrust::tuple<vertex_t, size_t> tagged_src,
+  return_type __host__ __device__ operator()(thrust::tuple<vertex_t, size_t> tagged_src,
                                     vertex_t dst,
                                     property_t sv,
                                     property_t dv,
