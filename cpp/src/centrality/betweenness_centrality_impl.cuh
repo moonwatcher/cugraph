@@ -71,7 +71,7 @@ struct brandes_pred_op_t {
 template <typename vertex_t>
 struct extract_edge_e_op_t {
   template <typename edge_t, typename weight_t>
-  __device__ thrust::tuple<vertex_t, vertex_t> operator()(
+  __host__ __device__ thrust::tuple<vertex_t, vertex_t> operator()(
     vertex_t src,
     vertex_t dst,
     thrust::tuple<vertex_t, edge_t, weight_t> src_props,

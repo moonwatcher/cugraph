@@ -54,14 +54,14 @@ namespace detail {
 template <typename vertex_t, typename weight_t>
 struct sample_edges_op_t {
   template <typename W = weight_t>
-  __device__ std::enable_if_t<std::is_same_v<W, void>, vertex_t> operator()(
+  __host__ __device__ std::enable_if_t<std::is_same_v<W, void>, vertex_t> operator()(
     vertex_t, vertex_t dst, cuda::std::nullopt_t, cuda::std::nullopt_t, cuda::std::nullopt_t) const
   {
     return dst;
   }
 
   template <typename W = weight_t>
-  __device__ std::enable_if_t<!std::is_same_v<W, void>, thrust::tuple<vertex_t, W>> operator()(
+  __host__ __device__ std::enable_if_t<!std::is_same_v<W, void>, thrust::tuple<vertex_t, W>> operator()(
     vertex_t, vertex_t dst, cuda::std::nullopt_t, cuda::std::nullopt_t, W w) const
   {
     return thrust::make_tuple(dst, w);
@@ -70,7 +70,7 @@ struct sample_edges_op_t {
 
 template <typename vertex_t, typename bias_t>
 struct biased_random_walk_e_bias_op_t {
-  __device__ bias_t operator()(
+  __host__ __device__ bias_t operator()(
     vertex_t, vertex_t, bias_t src_out_weight_sum, cuda::std::nullopt_t, bias_t weight) const
   {
     return weight / src_out_weight_sum;
@@ -79,7 +79,7 @@ struct biased_random_walk_e_bias_op_t {
 
 template <typename vertex_t, typename weight_t>
 struct biased_sample_edges_op_t {
-  __device__ thrust::tuple<vertex_t, weight_t> operator()(
+  __host__ __device__ thrust::tuple<vertex_t, weight_t> operator()(
     vertex_t, vertex_t dst, weight_t, cuda::std::nullopt_t, weight_t weight) const
   {
     return thrust::make_tuple(dst, weight);
@@ -97,7 +97,7 @@ struct node2vec_random_walk_e_bias_op_t {
 
   // Unweighted Bias Operator
   template <typename W = weight_t>
-  __device__ std::enable_if_t<std::is_same_v<W, void>, bias_t> operator()(
+  __host__ __device__ std::enable_if_t<std::is_same_v<W, void>, bias_t> operator()(
     thrust::tuple<vertex_t, vertex_t> tagged_src,
     vertex_t dst,
     cuda::std::nullopt_t,
@@ -124,7 +124,7 @@ struct node2vec_random_walk_e_bias_op_t {
 
   //  Weighted Bias Operator
   template <typename W = weight_t>
-  __device__ std::enable_if_t<!std::is_same_v<W, void>, bias_t> operator()(
+  __host__ __device__ std::enable_if_t<!std::is_same_v<W, void>, bias_t> operator()(
     thrust::tuple<vertex_t, vertex_t> tagged_src,
     vertex_t dst,
     cuda::std::nullopt_t,
@@ -153,7 +153,7 @@ struct node2vec_random_walk_e_bias_op_t {
 template <typename vertex_t, typename weight_t>
 struct node2vec_sample_edges_op_t {
   template <typename W = weight_t>
-  __device__ std::enable_if_t<std::is_same_v<W, void>, vertex_t> operator()(
+  __host__ __device__ std::enable_if_t<std::is_same_v<W, void>, vertex_t> operator()(
     thrust::tuple<vertex_t, vertex_t> tagged_src,
     vertex_t dst,
     cuda::std::nullopt_t,
@@ -164,7 +164,7 @@ struct node2vec_sample_edges_op_t {
   }
 
   template <typename W = weight_t>
-  __device__ std::enable_if_t<!std::is_same_v<W, void>, thrust::tuple<vertex_t, W>> operator()(
+  __host__ __device__ std::enable_if_t<!std::is_same_v<W, void>, thrust::tuple<vertex_t, W>> operator()(
     thrust::tuple<vertex_t, vertex_t> tagged_src,
     vertex_t dst,
     cuda::std::nullopt_t,

@@ -73,7 +73,7 @@ rmm::device_uvector<weight_t> similarity(
                    edge_src_dummy_property_t{}.view(),
                    edge_dst_dummy_property_t{}.view(),
                    *edge_weight_view,
-                   [] __device__(vertex_t, vertex_t, auto, auto, weight_t w) { return w < 0.0; });
+                   [] __host__ __device__(vertex_t, vertex_t, auto, auto, weight_t w) { return w < 0.0; });
       CUGRAPH_EXPECTS(
         num_negative_edge_weights == 0,
         "Invalid input argument: input edge weights should have non-negative values.");
@@ -254,7 +254,7 @@ all_pairs_similarity(raft::handle_t const& handle,
                    edge_src_dummy_property_t{}.view(),
                    edge_dst_dummy_property_t{}.view(),
                    *edge_weight_view,
-                   [] __device__(vertex_t, vertex_t, auto, auto, weight_t w) { return w < 0.0; });
+                   [] __host__ __device__(vertex_t, vertex_t, auto, auto, weight_t w) { return w < 0.0; });
 
       if constexpr (multi_gpu) {
         num_negative_edge_weights = cugraph::host_scalar_allreduce(handle.get_comms(),

@@ -65,7 +65,7 @@ struct is_two_or_greater_t {
 
 template <typename vertex_t, typename edge_t>
 struct extract_low_to_high_degree_edges_e_op_t {
-  __device__ thrust::tuple<vertex_t, vertex_t> operator()(vertex_t src,
+  __host__ __device__ thrust::tuple<vertex_t, vertex_t> operator()(vertex_t src,
                                                           vertex_t dst,
                                                           edge_t src_out_degree,
                                                           edge_t dst_out_degree,

@@ -139,7 +139,7 @@ struct uniform_selector_t {
     {
     }
 
-    __device__ cuda::std::optional<thrust::tuple<vertex_t, weight_t>> operator()(
+    __host__ __device__ cuda::std::optional<thrust::tuple<vertex_t, weight_t>> operator()(
       vertex_t src_v,
       real_t rnd_val,
       vertex_t = 0 /* not used*/,

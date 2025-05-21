@@ -117,7 +117,7 @@ struct cast_edge_op_bool_to_integer {
             typename DV = dst_value_type,
             typename EV = e_value_type,
             typename E  = EdgeOp>
-  __device__ std::enable_if_t<std::is_invocable_v<E, K, V, SV, DV, EV>, T> operator()(
+  __host__ __device__ std::enable_if_t<std::is_invocable_v<E, K, V, SV, DV, EV>, T> operator()(
     K s, V d, SV sv, DV dv, EV ev) const
   {
     return e_op(s, d, sv, dv, ev) ? T{1} : T{0};
