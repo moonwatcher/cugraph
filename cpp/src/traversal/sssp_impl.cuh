@@ -162,7 +162,7 @@ void sssp(raft::handle_t const& handle,
   average_vertex_degree /= static_cast<weight_t>(num_vertices);
   average_edge_weight /= static_cast<weight_t>(num_edges);
   auto delta =
-    (static_cast<weight_t>(raft::warp_size()) * average_edge_weight) / average_vertex_degree;
+    (static_cast<weight_t>(raft::host_warp_size(handle.get_device())) * average_edge_weight) / average_vertex_degree;
 
   // 4. initialize SSSP frontier
 
