@@ -3361,6 +3361,7 @@ void per_v_transform_reduce_e(raft::handle_t const& handle,
                                  ? handle.get_stream_from_stream_pool((*loop_stream_pool_indices)[j])
                                  : handle.get_stream();
 
+          #warning LG: This might still be broken since we are calling emplace on an std::optional{std::nullopt}
           std::optional<
             std::variant<raft::device_span<uint32_t const>, raft::device_span<size_t const>>>
             hypersparse_non_deg1_key_offsets{std::nullopt};
@@ -3369,19 +3370,19 @@ void per_v_transform_reduce_e(raft::handle_t const& handle,
               auto const& offsets = (*edge_partition_hypersparse_key_offset_vectors)[j];
 
               if (offsets.index() == 0) {
-                hypersparse_non_deg1_key_offsets = raft::device_span<uint32_t const>(
+                (*hypersparse_non_deg1_key_offsets).emplace<0>(raft::device_span<uint32_t const>(
                   std::get<0>(offsets).data(),
                   std::get<0>(offsets).size() -
                     (edge_partition_deg1_hypersparse_key_offset_counts
                        ? (*edge_partition_deg1_hypersparse_key_offset_counts)[j]
-                       : size_t{0}));
+                       : size_t{0})));
               } else {
-                hypersparse_non_deg1_key_offsets = raft::device_span<size_t const>(
+                 (*hypersparse_non_deg1_key_offsets).emplace<1>(raft::device_span<size_t const>(
                   std::get<1>(offsets).data(),
                   std::get<1>(offsets).size() -
                     (edge_partition_deg1_hypersparse_key_offset_counts
                        ? (*edge_partition_deg1_hypersparse_key_offset_counts)[j]
-                       : size_t{0}));
+                       : size_t{0})));
               }
               (*edge_partition_hypersparse_non_deg1_key_offset_spans)[j] =
                 *hypersparse_non_deg1_key_offsets;
