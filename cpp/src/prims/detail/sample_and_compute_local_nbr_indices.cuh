@@ -2067,6 +2067,10 @@ void compute_homogeneous_biased_sampling_index_without_replacement(
                                           offset_first + 1,
                                           handle.get_stream());
 
+      thrust::optional<raft::device_span<bias_t>> thrust_output_keys{thrust::nullopt};
+      if (output_keys) {
+        thrust_output_keys = *output_keys;
+      }
       if (output_frontier_indices) {
         thrust::for_each(
           handle.get_thrust_policy(),
@@ -2079,7 +2083,7 @@ void compute_homogeneous_biased_sampling_index_without_replacement(
                : input_degree_offsets,
            idx_offset              = chunk_offsets[i] * K,
            output_frontier_indices = *output_frontier_indices,
-           output_keys,
+           thrust_output_keys,
            output_nbr_indices,
            segment_sorted_keys        = raft::device_span<bias_t const>(segment_sorted_keys.data(),
                                                                  segment_sorted_keys.size()),
@@ -2095,13 +2099,13 @@ void compute_homogeneous_biased_sampling_index_without_replacement(
             auto segment_sorted_input_idx =
               (input_degree_offsets[key_idx] - input_degree_offsets[idx_offset / K]) + (idx % K);
             if ((idx % K) < degree) {
-              if (output_keys) {
-                (*output_keys)[output_idx] = segment_sorted_keys[segment_sorted_input_idx];
+              if (thrust_output_keys) {
+                (*thrust_output_keys)[output_idx] = segment_sorted_keys[segment_sorted_input_idx];
               }
               output_nbr_indices[output_idx] = segment_sorted_nbr_indices[segment_sorted_input_idx];
             } else {
-              if (output_keys) {
-                (*output_keys)[output_idx] = std::numeric_limits<bias_t>::infinity();
+              if (thrust_output_keys) {
+                (*thrust_output_keys)[output_idx] = std::numeric_limits<bias_t>::infinity();
               }
               output_nbr_indices[output_idx] = invalid_idx;
             }
@@ -2117,7 +2121,7 @@ void compute_homogeneous_biased_sampling_index_without_replacement(
                                                  (*packed_input_degree_offsets).size())
                : input_degree_offsets,
            idx_offset = chunk_offsets[i] * K,
-           output_keys,
+           thrust_output_keys,
            output_nbr_indices,
            segment_sorted_keys        = raft::device_span<bias_t const>(segment_sorted_keys.data(),
                                                                  segment_sorted_keys.size()),
@@ -2131,12 +2135,12 @@ void compute_homogeneous_biased_sampling_index_without_replacement(
             auto segment_sorted_input_idx =
               (input_degree_offsets[key_idx] - input_degree_offsets[idx_offset / K]) + (idx % K);
             if ((idx % K) < degree) {
-              if (output_keys) {
-                (*output_keys)[idx] = segment_sorted_keys[segment_sorted_input_idx];
+              if (thrust_output_keys) {
+                (*thrust_output_keys)[idx] = segment_sorted_keys[segment_sorted_input_idx];
               }
               output_nbr_indices[idx] = segment_sorted_nbr_indices[segment_sorted_input_idx];
             } else {
-              if (output_keys) { (*output_keys)[idx] = std::numeric_limits<bias_t>::infinity(); }
+              if (thrust_output_keys) { (*thrust_output_keys)[idx] = std::numeric_limits<bias_t>::infinity(); }
               output_nbr_indices[idx] = invalid_idx;
             }
           });
