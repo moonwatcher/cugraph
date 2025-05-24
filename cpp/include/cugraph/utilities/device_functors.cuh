@@ -165,6 +165,7 @@ template <typename T>
 struct multiplier_t {
   T multiplier{};
 
+  multiplier_t(T multiplier) : multiplier(multiplier) {};
   __device__ T operator()(T input) const { return input * multiplier; }
 };
 
