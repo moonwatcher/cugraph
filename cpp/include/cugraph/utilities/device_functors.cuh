@@ -19,6 +19,7 @@
 #include <cugraph/utilities/packed_bool_utils.hpp>
 
 #include <thrust/iterator/iterator_traits.h>
+#include <thrust/optional.h>
 
 #include <cstddef>
 
@@ -165,6 +166,26 @@ struct multiplier_t {
   T multiplier{};
 
   __device__ T operator()(T input) const { return input * multiplier; }
+};
+
+template <typename T>
+struct multiplier_with_offset_t : public multiplier_t<T> {
+  thrust::optional<raft::device_span<T const>> offset{};
+
+  multiplier_with_offset_t(
+    T multiplier,
+    thrust::optional<raft::device_span<T const>> offset
+  ) :
+    multiplier_t<T>(multiplier),
+    offset(offset) {
+  }
+  __device__ T operator()(T input) const {
+    if (offset.has_value()) {
+      return input * this->multiplier + (*offset)[input];
+    } else {
+      return input * this->multiplier;
+    }
+  }
 };
 
 template <typename T>
