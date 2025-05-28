@@ -106,7 +106,7 @@ struct extract_low_to_high_degree_edges_from_endpoints_e_op_t {
   raft::device_span<vertex_t const> srcs{};
   raft::device_span<vertex_t const> dsts{};
   raft::device_span<edge_t const> count{};
-  __device__ thrust::tuple<vertex_t, vertex_t, edge_t> operator()(vertex_t src,
+  __host__ __device__ thrust::tuple<vertex_t, vertex_t, edge_t> operator()(vertex_t src,
                                                                   vertex_t dst,
                                                                   edge_t src_out_degree,
                                                                   edge_t dst_out_degree,
@@ -137,7 +137,7 @@ template <typename vertex_t, typename edge_t>
 struct extract_low_to_high_degree_edges_from_endpoints_pred_op_t {
   raft::device_span<vertex_t const> srcs{};
   raft::device_span<vertex_t const> dsts{};
-  __device__ bool operator()(vertex_t src, vertex_t dst, edge_t, edge_t, cuda::std::nullopt_t) const
+  __host__ __device__ bool operator()(vertex_t src, vertex_t dst, edge_t, edge_t, cuda::std::nullopt_t) const
   {
     return thrust::binary_search(thrust::seq,
                                  thrust::make_zip_iterator(srcs.begin(), dsts.begin()),
@@ -316,10 +316,10 @@ k_truss(raft::handle_t const& handle,
         edge_dst_dummy_property_t{}.view(),
         edge_triangle_counts.view(),
         cuda::proclaim_return_type<thrust::tuple<vertex_t, vertex_t>>(
-          [] __device__(vertex_t src, vertex_t dst, auto, auto, auto) {
+          [] __host__ __device__(vertex_t src, vertex_t dst, auto, auto, auto) {
             return thrust::make_tuple(src, dst);
           }),
-        cuda::proclaim_return_type<bool>([k] __device__(auto, auto, auto, auto, edge_t count) {
+        cuda::proclaim_return_type<bool>([k] __host__ __device__(auto, auto, auto, auto, edge_t count) {
           return ((count < k - 2) && (count != 0));
         }));
 
