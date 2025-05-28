@@ -73,7 +73,7 @@ struct hash_and_mod_src_dst_pair_t {
     std::conditional_t<sizeof(vertex_t) == 8, cuco::xxhash_64<vertex_t>, cuco::xxhash_32<vertex_t>>
       hash_func{};
     return static_cast<int>(
-      hash_func.compute_hash(reinterpret_cast<cuda::std::byte*>(buf), 2 * sizeof(vertex_t)) % mod);
+      hash_func.compute_hash(reinterpret_cast<std::byte*>(buf), 2 * sizeof(vertex_t)) % mod);
   }
 };
 
