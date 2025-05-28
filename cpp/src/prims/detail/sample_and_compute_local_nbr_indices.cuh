@@ -1383,16 +1383,20 @@ rmm::device_uvector<edge_t> compute_homogeneous_uniform_sampling_index_without_r
         tmp_nbr_indices.data(),
         num_segments * high_partition_oversampling_K,
         num_segments,
-        thrust::make_transform_iterator(thrust::make_counting_iterator(size_t{0}),
-                                        multiplier_t<size_t>{high_partition_oversampling_K}),
+       thrust::make_transform_iterator(
+          thrust::make_counting_iterator(edge_t{0}),
+          multiplier_with_offset_t<edge_t>{
+            high_partition_oversampling_K,
+            thrust::nullopt
+          }
+        ),
         thrust::make_transform_iterator(
-          thrust::make_counting_iterator(size_t{0}),
-          cuda::proclaim_return_type<size_t>(
-            [high_partition_oversampling_K,
-             unique_counts = raft::device_span<edge_t const>(
-               unique_counts.data(), unique_counts.size())] __device__(size_t i) {
-              return i * high_partition_oversampling_K + unique_counts[i];
-            })),
+          thrust::make_counting_iterator(edge_t{0}),
+          multiplier_with_offset_t<edge_t>{
+            high_partition_oversampling_K,
+            raft::device_span<edge_t const>(unique_counts.data(), unique_counts.size())
+          }
+        ),
         handle.get_stream());
       if (tmp_storage_bytes > d_tmp_storage.size()) {
         d_tmp_storage = rmm::device_uvector<std::byte>(tmp_storage_bytes, handle.get_stream());
@@ -1406,16 +1410,20 @@ rmm::device_uvector<edge_t> compute_homogeneous_uniform_sampling_index_without_r
         tmp_nbr_indices.data(),
         num_segments * high_partition_oversampling_K,
         num_segments,
-        thrust::make_transform_iterator(thrust::make_counting_iterator(size_t{0}),
-                                        multiplier_t<size_t>{high_partition_oversampling_K}),
+       thrust::make_transform_iterator(
+          thrust::make_counting_iterator(edge_t{0}),
+          multiplier_with_offset_t<edge_t>{
+            high_partition_oversampling_K,
+            thrust::nullopt
+          }
+        ),
         thrust::make_transform_iterator(
-          thrust::make_counting_iterator(size_t{0}),
-          cuda::proclaim_return_type<size_t>(
-            [high_partition_oversampling_K,
-             unique_counts = raft::device_span<edge_t const>(
-               unique_counts.data(), unique_counts.size())] __device__(size_t i) {
-              return i * high_partition_oversampling_K + unique_counts[i];
-            })),
+          thrust::make_counting_iterator(edge_t{0}),
+          multiplier_with_offset_t<edge_t>{
+            high_partition_oversampling_K,
+            raft::device_span<edge_t const>(unique_counts.data(), unique_counts.size())
+          }
+        ),
         handle.get_stream());
 
       // copy the neighbor indices back to nbr_indices
