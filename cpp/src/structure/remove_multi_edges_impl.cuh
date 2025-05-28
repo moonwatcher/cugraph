@@ -61,7 +61,7 @@ struct hash_src_dst_pair_t {
     buf[1] = thrust::get<1>(pair);
     std::conditional_t<sizeof(vertex_t) == 8, cuco::xxhash_64<vertex_t>, cuco::xxhash_32<vertex_t>>
       hash_func{};
-    return hash_func.compute_hash(reinterpret_cast<cuda::std::byte*>(buf), 2 * sizeof(vertex_t));
+    return hash_func.compute_hash(reinterpret_cast<std::byte*>(buf), 2 * sizeof(vertex_t));
   }
 };
 
