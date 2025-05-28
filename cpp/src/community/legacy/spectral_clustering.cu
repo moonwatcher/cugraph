@@ -90,7 +90,8 @@ void balancedCutClustering_impl(legacy::GraphCSRView<vertex_t, edge_t, weight_t>
   using value_type = weight_t;
   using nnz_type   = edge_t;
 
-  raft::spectral::matrix::sparse_matrix_t<index_type, value_type, nnz_type> const r_csr_m{handle,
+  #warning LG: this is a hack until raft sparse_matrix_t catches up
+  raft::spectral::matrix::sparse_matrix_t<index_type, value_type/*, nnz_type*/> const r_csr_m{handle,
                                                                                           graph};
 
   raft::spectral::eigen_solver_config_t<index_type, value_type, nnz_type> eig_cfg{
@@ -162,7 +163,8 @@ void spectralModularityMaximization_impl(
   using value_type = weight_t;
   using nnz_type   = edge_t;
 
-  raft::spectral::matrix::sparse_matrix_t<index_type, value_type, nnz_type> const r_csr_m{handle,
+  #warning LG: this is a hack until raft sparse_matrix_t catches up
+  raft::spectral::matrix::sparse_matrix_t<index_type, value_type/*, nnz_type*/> const r_csr_m{handle,
                                                                                           graph};
 
   raft::spectral::eigen_solver_config_t<index_type, value_type, nnz_type> eig_cfg{
@@ -196,7 +198,8 @@ void analyzeModularityClustering_impl(legacy::GraphCSRView<vertex_t, edge_t, wei
   using value_type = weight_t;
   using nnz_type   = edge_t;
 
-  raft::spectral::matrix::sparse_matrix_t<index_type, value_type, nnz_type> const r_csr_m{handle,
+  #warning LG: this is a hack until raft sparse_matrix_t catches up
+  raft::spectral::matrix::sparse_matrix_t<index_type, value_type/*, nnz_type*/> const r_csr_m{handle,
                                                                                           graph};
 
   weight_t mod;
@@ -224,7 +227,8 @@ void analyzeBalancedCut_impl(legacy::GraphCSRView<vertex_t, edge_t, weight_t> co
   using value_type = weight_t;
   using nnz_type   = edge_t;
 
-  raft::spectral::matrix::sparse_matrix_t<index_type, value_type, nnz_type> const r_csr_m{handle,
+  #warning LG: this is a hack until raft sparse_matrix_t catches up
+  raft::spectral::matrix::sparse_matrix_t<index_type, value_type/*, nnz_type*/> const r_csr_m{handle,
                                                                                           graph};
 
   raft::spectral::analyzePartition(handle, r_csr_m, n_clusters, clustering, edge_cut, cost);
