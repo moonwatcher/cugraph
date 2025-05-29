@@ -2709,7 +2709,7 @@ compute_aggregate_local_frontier_bias_type_pairs(
       edge_dst_value_input,
       view_concat(edge_value_input, edge_type_input),
       cuda::proclaim_return_type<thrust::tuple<bias_t, edge_type_t>>(
-        [bias_e_op] __device__(auto src, auto dst, auto src_val, auto dst_val, auto e_val) {
+        [bias_e_op] __host__ __device__(auto src, auto dst, auto src_val, auto dst_val, auto e_val) {
           return thrust::make_tuple(bias_e_op(src, dst, src_val, dst_val, thrust::get<0>(e_val)),
                                     thrust::get<1>(e_val));
         }),
