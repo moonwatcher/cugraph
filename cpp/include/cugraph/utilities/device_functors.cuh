@@ -19,7 +19,7 @@
 #include <cugraph/utilities/packed_bool_utils.hpp>
 
 #include <thrust/iterator/iterator_traits.h>
-#include <thrust/optional.h>
+#include <cuda/std/optional>
 
 #include <cstddef>
 
@@ -171,11 +171,11 @@ struct multiplier_t {
 
 template <typename T>
 struct multiplier_with_offset_t : public multiplier_t<T> {
-  thrust::optional<raft::device_span<T const>> offset{};
+  cuda::std::optional<raft::device_span<T const>> offset{};
 
   multiplier_with_offset_t(
     T multiplier,
-    thrust::optional<raft::device_span<T const>> offset
+    cuda::std::optional<raft::device_span<T const>> offset
   ) :
     multiplier_t<T>(multiplier),
     offset(offset) {
