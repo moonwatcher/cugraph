@@ -88,7 +88,7 @@ template <typename key_t,
 struct transform_reduce_if_v_frontier_call_e_op_t {
   EdgeOp e_op{};
 
-  __device__ std::conditional_t<!std::is_same_v<key_t, void> && !std::is_same_v<payload_t, void>,
+  __host__ __device__ std::conditional_t<!std::is_same_v<key_t, void> && !std::is_same_v<payload_t, void>,
                                 thrust::tuple<key_t, payload_t>,
                                 std::conditional_t<!std::is_same_v<key_t, void>, key_t, payload_t>>
   operator()(key_t key, vertex_t dst, src_value_t sv, dst_value_t dv, e_value_t ev) const
