@@ -1387,7 +1387,7 @@ rmm::device_uvector<edge_t> compute_homogeneous_uniform_sampling_index_without_r
           thrust::make_counting_iterator(edge_t{0}),
           multiplier_with_offset_t<edge_t>{
             high_partition_oversampling_K,
-            thrust::nullopt
+            cuda::std::nullopt
           }
         ),
         thrust::make_transform_iterator(
@@ -1414,7 +1414,7 @@ rmm::device_uvector<edge_t> compute_homogeneous_uniform_sampling_index_without_r
           thrust::make_counting_iterator(edge_t{0}),
           multiplier_with_offset_t<edge_t>{
             high_partition_oversampling_K,
-            thrust::nullopt
+            cuda::std::nullopt
           }
         ),
         thrust::make_transform_iterator(
@@ -1829,7 +1829,7 @@ rmm::device_uvector<edge_t> compute_heterogeneous_uniform_sampling_index_without
           thrust::make_counting_iterator(edge_t{0}),
           multiplier_with_offset_t<edge_t>{
             high_partition_oversampling_K,
-            thrust::nullopt
+            cuda::std::nullopt
           }
         ),
         thrust::make_transform_iterator(
@@ -1856,7 +1856,7 @@ rmm::device_uvector<edge_t> compute_heterogeneous_uniform_sampling_index_without
           thrust::make_counting_iterator(edge_t{0}),
           multiplier_with_offset_t<edge_t>{
             high_partition_oversampling_K,
-            thrust::nullopt
+            cuda::std::nullopt
           }
         ),
         thrust::make_transform_iterator(
