@@ -465,10 +465,10 @@ void weakly_connected_components_impl(raft::handle_t const& handle,
         edge_dst_dummy_property_t{}.view(),
         edge_dummy_property_t{}.view(),
         cuda::proclaim_return_type<thrust::tuple<vertex_t, vertex_t>>(
-          [] __device__(auto src, auto dst, auto, auto, auto) {
+          [] __host__ __device__(auto src, auto dst, auto, auto, auto) {
             return thrust::make_tuple(src, dst);
           }),
-        cuda::proclaim_return_type<bool>([] __device__(
+        cuda::proclaim_return_type<bool>([] __host__ __device__(
                                            auto src, auto dst, bool src_visited, auto, auto) {
           return (src > dst) /* keep only the edges in the lower triangular part */ && !src_visited;
         }));
