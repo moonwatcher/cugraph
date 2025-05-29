@@ -51,7 +51,7 @@ template <typename key_t,
           typename EdgePartitionEdgeValueInputWrapper,
           typename EdgeOp,
           typename ValueIterator>
-__device__ void transform_v_frontier_e_update_buffer_element(
+__host__ __device__ void transform_v_frontier_e_update_buffer_element(
   edge_partition_device_view_t<typename GraphViewType::vertex_type,
                                typename GraphViewType::edge_type,
                                GraphViewType::is_multi_gpu>& edge_partition,
