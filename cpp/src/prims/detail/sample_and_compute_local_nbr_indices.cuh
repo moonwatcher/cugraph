@@ -2868,7 +2868,7 @@ compute_aggregate_local_frontier_edge_types(raft::handle_t const& handle,
       edge_src_dummy_property_t{}.view(),
       edge_dst_dummy_property_t{}.view(),
       edge_type_input,
-      [] __device__(auto, auto, auto, auto, auto e_val) { return e_val; },
+      [] __host__ __device__(auto, auto, auto, auto, auto e_val) { return e_val; },
       raft::host_span<size_t const>(local_frontier_offsets.data(), local_frontier_offsets.size()));
 
   return std::make_tuple(std::move(aggregate_local_frontier_types),
