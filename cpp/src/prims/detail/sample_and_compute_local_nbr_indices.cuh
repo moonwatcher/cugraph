@@ -2085,7 +2085,7 @@ void compute_homogeneous_biased_sampling_index_without_replacement(
                                           offset_first + 1,
                                           handle.get_stream());
 
-      cuda::std::optional<raft::device_span<bias_t>> output_keys_d{thrust::nullopt};
+      cuda::std::optional<raft::device_span<bias_t>> output_keys_d{cuda::std::nullopt};
       if (output_keys) {
         output_keys_d = *output_keys;
       }
