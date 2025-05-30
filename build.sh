@@ -11,6 +11,9 @@
 # Abort script on first error
 set -e
 
+export RAPIDS_CMAKE_BRANCH=feat/25.04-logger
+export RAPIDS_CMAKE_URL=https://${GITHUB_USER}:${GITHUB_PASS}@github.com/AMD-AI/ROCmDS-cmake
+
 NUMARGS=$#
 ARGS=$*
 
@@ -240,6 +243,9 @@ if buildDefault || hasArg libcugraph || hasArg all; then
         mkdir -p ${LIBCUGRAPH_BUILD_DIR}
         cd ${LIBCUGRAPH_BUILD_DIR}
         cmake -B "${LIBCUGRAPH_BUILD_DIR}" -S "${REPODIR}/cpp" \
+	          -DCMAKE_CXX_COMPILER=/opt/rocm/bin/hipcc \
+	          -DCMAKE_C_COMPILER=/opt/rocm/bin/hipcc \
+              -DCMAKE_CXX_STANDARD=17 \
               -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
               -DCMAKE_CUDA_ARCHITECTURES=${CUGRAPH_CMAKE_CUDA_ARCHITECTURES} \
               -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
@@ -269,6 +275,8 @@ if buildDefault || hasArg libcugraph_etl || hasArg all; then
         fi
         mkdir -p ${LIBCUGRAPH_ETL_BUILD_DIR}
          cd ${LIBCUGRAPH_ETL_BUILD_DIR}
+        # LG: 3P usually set CMAKE_PREFIX_PATH to /opt/rocm/lib/cmake
+        # -DCMAKE_PREFIX_PATH=/opt/rocm/lib/cmake
         cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
               -DCMAKE_CUDA_ARCHITECTURES=${CUGRAPH_CMAKE_CUDA_ARCHITECTURES} \
               -DDISABLE_DEPRECATION_WARNING=${BUILD_DISABLE_DEPRECATION_WARNING} \
