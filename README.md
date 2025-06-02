@@ -1,3 +1,5 @@
+# ** NOTICE ** this is a hipified branch of the 25.02 code base
+
 # ** NOTICE ** the cuGraph repository has been refactored to make it more efficient to build, maintain and use.
 
 Libraries supporting GNNs are now located in the [cugraph-gnn repository](https://github.com/rapidsai/cugraph-gnn)
