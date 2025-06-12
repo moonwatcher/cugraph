@@ -194,7 +194,7 @@ template <typename ViewType>
 struct kv_cuco_store_find_device_view_t {
   using key_type                   = typename ViewType::key_type;
   using value_type                 = typename ViewType::value_type;
-  using cuco_store_device_ref_type = typename ViewType::cuco_map_type::ref_type<cuco::find_tag>;
+  using cuco_store_device_ref_type = typename ViewType::cuco_map_type::template ref_type<cuco::find_tag>;
 
   static_assert(!ViewType::binary_search);
 
