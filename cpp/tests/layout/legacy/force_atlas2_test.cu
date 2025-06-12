@@ -23,7 +23,7 @@
 
 #include <rmm/exec_policy.hpp>
 
-#include <cuda_profiler_api.h>
+#include <hip/hip_runtime_api.h>
 
 #include <fstream>
 #include <iostream>
@@ -136,9 +136,9 @@ class Tests_Force_Atlas2 : public ::testing::TestWithParam<Force_Atlas2_Usecase>
     T* weights = weights_v.data();
 
     // FIXME: RAFT error handling mechanism should be used instead
-    RAFT_CUDA_TRY(cudaMemcpy(srcs, &cooRowInd[0], sizeof(int) * nnz, cudaMemcpyDefault));
-    RAFT_CUDA_TRY(cudaMemcpy(dests, &cooColInd[0], sizeof(int) * nnz, cudaMemcpyDefault));
-    RAFT_CUDA_TRY(cudaMemcpy(weights, &cooVal[0], sizeof(T) * nnz, cudaMemcpyDefault));
+    RAFT_CUDA_TRY(hipMemcpy(srcs, &cooRowInd[0], sizeof(int) * nnz, hipMemcpyDefault));
+    RAFT_CUDA_TRY(hipMemcpy(dests, &cooColInd[0], sizeof(int) * nnz, hipMemcpyDefault));
+    RAFT_CUDA_TRY(hipMemcpy(weights, &cooVal[0], sizeof(T) * nnz, hipMemcpyDefault));
     cugraph::legacy::GraphCOOView<int, int, T> G(srcs, dests, weights, m, nnz);
 
     const int max_iter                    = 500;
@@ -176,12 +176,12 @@ class Tests_Force_Atlas2 : public ::testing::TestWithParam<Force_Atlas2_Usecase>
                                            strong_gravity_mode,
                                            gravity,
                                            verbose);
-        cudaDeviceSynchronize();
+        hipDeviceSynchronize();
       }
       auto time_tmp = hr_timer.stop();
       force_atlas2_time.push_back(time_tmp);
     } else {
-      cudaProfilerStart();
+      hipProfilerStart();
       cugraph::force_atlas2<int, int, T>(handle,
                                          G,
                                          pos.data(),
@@ -199,13 +199,13 @@ class Tests_Force_Atlas2 : public ::testing::TestWithParam<Force_Atlas2_Usecase>
                                          strong_gravity_mode,
                                          gravity,
                                          verbose);
-      cudaProfilerStop();
-      cudaDeviceSynchronize();
+      hipProfilerStop();
+      hipDeviceSynchronize();
     }
 
     // Copy pos to host
     std::vector<float> h_pos(m * 2);
-    RAFT_CUDA_TRY(cudaMemcpy(&h_pos[0], pos.data(), sizeof(float) * m * 2, cudaMemcpyDeviceToHost));
+    RAFT_CUDA_TRY(hipMemcpy(&h_pos[0], pos.data(), sizeof(float) * m * 2, hipMemcpyDeviceToHost));
 
     // Transpose the data
     std::vector<std::vector<double>> C_contiguous_embedding(m, std::vector<double>(2));

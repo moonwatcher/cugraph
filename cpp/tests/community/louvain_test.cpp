@@ -64,7 +64,7 @@ class Tests_Louvain
     if (louvain_usecase.check_correctness_) renumber = false;
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       hr_timer.start("Construct graph");
     }
 
@@ -73,7 +73,7 @@ class Tests_Louvain
         handle, input_usecase, true, renumber);
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       hr_timer.stop();
       hr_timer.display_and_clear(std::cout);
     }
@@ -83,7 +83,7 @@ class Tests_Louvain
       edge_weights ? std::make_optional((*edge_weights).view()) : std::nullopt;
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       hr_timer.start("Louvain");
     }
 
@@ -98,7 +98,7 @@ class Tests_Louvain
             louvain_usecase.expected_modularity_);
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       hr_timer.stop();
       hr_timer.display_and_clear(std::cout);
     }
@@ -158,7 +158,7 @@ class Tests_Louvain
         clustering_v.data());
     }
 
-    RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+    RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
 
     float compare_modularity = static_cast<float>(modularity);
 

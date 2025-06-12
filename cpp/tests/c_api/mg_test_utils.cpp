@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2022-2025, NVIDIA CORPORATION.
  *
@@ -87,14 +88,14 @@ extern "C" void* create_mg_raft_handle(int argc, char** argv)
   int comm_rank;
   int comm_size;
   int num_gpus_per_node;
-  cudaError_t status;
+  hipError_t status;
   int mpi_status;
 
   C_MPI_TRY(MPI_Init(&argc, &argv));
   C_MPI_TRY(MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank));
   C_MPI_TRY(MPI_Comm_size(MPI_COMM_WORLD, &comm_size));
-  C_CUDA_TRY(cudaGetDeviceCount(&num_gpus_per_node));
-  C_CUDA_TRY(cudaSetDevice(comm_rank % num_gpus_per_node));
+  C_CUDA_TRY(hipGetDeviceCount(&num_gpus_per_node));
+  C_CUDA_TRY(hipSetDevice(comm_rank % num_gpus_per_node));
 
   raft::handle_t* handle = new raft::handle_t{};
   raft::comms::initialize_mpi_comms(handle, MPI_COMM_WORLD);

@@ -73,7 +73,7 @@ class Tests_SamplingPostProcessing
     // 1. create a graph
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       hr_timer.start("Construct graph");
     }
 
@@ -82,7 +82,7 @@ class Tests_SamplingPostProcessing
         handle, input_usecase, test_weighted, renumber);
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       hr_timer.stop();
       hr_timer.display_and_clear(std::cout);
     }
@@ -224,7 +224,7 @@ class Tests_SamplingPostProcessing
         std::nullopt};
 
       if (cugraph::test::g_perf) {
-        RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+        RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
         hr_timer.start("Renumber and sort sampled edgelist");
       }
 
@@ -261,7 +261,7 @@ class Tests_SamplingPostProcessing
           sampling_post_processing_usecase.src_is_major);
 
       if (cugraph::test::g_perf) {
-        RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+        RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
         hr_timer.stop();
         hr_timer.display_and_clear(std::cout);
       }
@@ -451,7 +451,7 @@ class Tests_SamplingPostProcessing
         renumbered_and_compressed_renumber_map_label_offsets{std::nullopt};
 
       if (cugraph::test::g_perf) {
-        RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+        RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
         hr_timer.start("Renumber and compressed sampled edgelist");
       }
 
@@ -491,7 +491,7 @@ class Tests_SamplingPostProcessing
           sampling_post_processing_usecase.doubly_compress);
 
       if (cugraph::test::g_perf) {
-        RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+        RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
         hr_timer.stop();
         hr_timer.display_and_clear(std::cout);
       }
@@ -728,7 +728,7 @@ class Tests_SamplingPostProcessing
       std::optional<rmm::device_uvector<size_t>> sorted_edgelist_label_hop_offsets{std::nullopt};
 
       if (cugraph::test::g_perf) {
-        RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+        RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
         hr_timer.start("Sort sampled edgelist");
       }
 
@@ -755,7 +755,7 @@ class Tests_SamplingPostProcessing
           sampling_post_processing_usecase.src_is_major);
 
       if (cugraph::test::g_perf) {
-        RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+        RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
         hr_timer.stop();
         hr_timer.display_and_clear(std::cout);
       }

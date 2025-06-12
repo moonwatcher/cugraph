@@ -63,7 +63,7 @@ class Tests_SGGraphColoring
     HighResTimer hr_timer{};
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());
+      RAFT_CUDA_TRY(hipDeviceSynchronize());
       hr_timer.start("Construct graph");
     }
 
@@ -74,7 +74,7 @@ class Tests_SGGraphColoring
         handle, input_usecase, false, true);
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());
+      RAFT_CUDA_TRY(hipDeviceSynchronize());
       hr_timer.stop();
       hr_timer.display_and_clear(std::cout);
     }
@@ -134,7 +134,7 @@ class Tests_SGGraphColoring
                         handle.get_stream());
       handle.sync_stream();
 
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());
+      RAFT_CUDA_TRY(hipDeviceSynchronize());
 
       edge_t nr_conflicts = cugraph::transform_reduce_e(
         handle,

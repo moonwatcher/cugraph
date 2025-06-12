@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2023-2024, NVIDIA CORPORATION.
  *
@@ -256,7 +257,7 @@ class Tests_GenerateBipartiteRmat : public ::testing::TestWithParam<GenerateBipa
       rmm::device_uvector<vertex_t> d_dsts(0, handle.get_stream());
 
       if (cugraph::test::g_perf) {
-        RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+        RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
         hr_timer.start("Generate edge list");
       }
 
@@ -276,7 +277,7 @@ class Tests_GenerateBipartiteRmat : public ::testing::TestWithParam<GenerateBipa
       }
 
       if (cugraph::test::g_perf) {
-        RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+        RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
         hr_timer.stop();
         hr_timer.display_and_clear(std::cout);
       }

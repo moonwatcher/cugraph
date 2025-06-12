@@ -61,7 +61,7 @@ class Tests_Multithreaded
   std::vector<int> get_gpu_list()
   {
     int num_gpus_per_node{1};
-    RAFT_CUDA_TRY(cudaGetDeviceCount(&num_gpus_per_node));
+    RAFT_CUDA_TRY(hipGetDeviceCount(&num_gpus_per_node));
 
     std::vector<int> gpu_list(num_gpus_per_node);
     std::iota(gpu_list.begin(), gpu_list.end(), 0);

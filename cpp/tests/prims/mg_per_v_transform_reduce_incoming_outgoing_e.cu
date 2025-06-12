@@ -106,7 +106,7 @@ class Tests_MGPerVTransformReduceIncomingOutgoingE
     // 1. create MG graph
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       handle_->get_comms().barrier();
       hr_timer.start("MG Construct graph");
     }
@@ -118,7 +118,7 @@ class Tests_MGPerVTransformReduceIncomingOutgoingE
         *handle_, input_usecase, prims_usecase.test_weighted, true);
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       handle_->get_comms().barrier();
       hr_timer.stop();
       hr_timer.display_and_clear(std::cout);
@@ -165,7 +165,7 @@ class Tests_MGPerVTransformReduceIncomingOutgoingE
         mg_graph_view.local_vertex_partition_range_size(), handle_->get_stream()));
 
       if (cugraph::test::g_perf) {
-        RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+        RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
         handle_->get_comms().barrier();
         hr_timer.start("MG per_v_transform_reduce_incoming_e");
       }
@@ -208,7 +208,7 @@ class Tests_MGPerVTransformReduceIncomingOutgoingE
       }
 
       if (cugraph::test::g_perf) {
-        RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+        RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
         handle_->get_comms().barrier();
         hr_timer.stop();
         hr_timer.display_and_clear(std::cout);
@@ -218,7 +218,7 @@ class Tests_MGPerVTransformReduceIncomingOutgoingE
         mg_graph_view.local_vertex_partition_range_size(), handle_->get_stream()));
 
       if (cugraph::test::g_perf) {
-        RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+        RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
         handle_->get_comms().barrier();
         hr_timer.start("MG per_v_transform_reduce_outgoing_e");
       }
@@ -261,7 +261,7 @@ class Tests_MGPerVTransformReduceIncomingOutgoingE
       }
 
       if (cugraph::test::g_perf) {
-        RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+        RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
         handle_->get_comms().barrier();
         hr_timer.stop();
         hr_timer.display_and_clear(std::cout);

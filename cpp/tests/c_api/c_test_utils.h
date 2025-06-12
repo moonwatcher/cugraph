@@ -18,7 +18,7 @@
 #include <cugraph_c/graph.h>
 #include <cugraph_c/resource_handle.h>
 
-#include <cuda_runtime_api.h>
+#include <hip/hip_runtime_api.h>
 
 #include <stdio.h>
 #include <time.h>

@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2021-2025, NVIDIA CORPORATION.
  *
@@ -39,7 +40,7 @@
 #include <thrust/sequence.h>
 #include <thrust/transform.h>
 
-#include <cuda_profiler_api.h>
+#include <hip/hip_runtime_api.h>
 
 #include <gtest/gtest.h>
 
@@ -209,7 +210,7 @@ class Tests_MsBfs : public ::testing::TestWithParam<MsBfs_Usecase> {
     // one by one
     HighResTimer hr_timer;
     hr_timer.start("bfs");
-    cudaProfilerStart();
+    hipProfilerStart();
     for (size_t i = 0; i < h_sources.size(); i++) {
       source = h_sources[i];
       rmm::device_scalar<vertex_t> const d_source_i(source, handle.get_stream());
@@ -222,7 +223,7 @@ class Tests_MsBfs : public ::testing::TestWithParam<MsBfs_Usecase> {
                    direction_optimizing,
                    configuration.radius);
     }
-    cudaProfilerStop();
+    hipProfilerStop();
     hr_timer.stop();
 
     // ms
@@ -231,7 +232,7 @@ class Tests_MsBfs : public ::testing::TestWithParam<MsBfs_Usecase> {
                                                  handle.get_stream());
 
     hr_timer.start("msbfs");
-    cudaProfilerStart();
+    hipProfilerStart();
     cugraph::bfs(handle,
                  graph_view,
                  d_distances.begin(),
@@ -241,7 +242,7 @@ class Tests_MsBfs : public ::testing::TestWithParam<MsBfs_Usecase> {
                  direction_optimizing,
                  configuration.radius);
 
-    cudaProfilerStop();
+    hipProfilerStop();
     hr_timer.stop();
     hr_timer.display_and_clear(std::cout);
 

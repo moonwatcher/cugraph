@@ -75,7 +75,7 @@ class Tests_SamplingHeterogeneousPostProcessing
     // 1. create a graph
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       hr_timer.start("Construct graph");
     }
 
@@ -84,7 +84,7 @@ class Tests_SamplingHeterogeneousPostProcessing
         handle, input_usecase, test_weighted, renumber);
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       hr_timer.stop();
       hr_timer.display_and_clear(std::cout);
     }
@@ -299,7 +299,7 @@ class Tests_SamplingHeterogeneousPostProcessing
         renumbered_and_sorted_edge_id_renumber_map_label_type_offsets{std::nullopt};
 
       if (cugraph::test::g_perf) {
-        RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+        RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
         hr_timer.start("Renumber and sort sampled edgelist");
       }
 
@@ -344,7 +344,7 @@ class Tests_SamplingHeterogeneousPostProcessing
           sampling_heterogeneous_post_processing_usecase.src_is_major);
 
       if (cugraph::test::g_perf) {
-        RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+        RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
         hr_timer.stop();
         hr_timer.display_and_clear(std::cout);
       }

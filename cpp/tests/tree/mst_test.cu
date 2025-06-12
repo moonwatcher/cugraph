@@ -31,7 +31,7 @@
 #include <thrust/iterator/constant_iterator.h>
 #include <thrust/reduce.h>
 
-#include <cuda_profiler_api.h>
+#include <hip/hip_runtime_api.h>
 
 #include <cmath>
 
@@ -115,14 +115,14 @@ class Tests_Mst : public ::testing::TestWithParam<Mst_Usecase> {
                                                  G_unique->view().number_of_vertices,
                                                  G_unique->view().number_of_edges);
 
-    cudaDeviceSynchronize();
+    hipDeviceSynchronize();
 
     hr_timer.start("MST");
-    cudaProfilerStart();
+    hipProfilerStart();
     auto mst_edges = cugraph::minimum_spanning_tree<int, int, T>(handle, G);
-    cudaProfilerStop();
+    hipProfilerStop();
 
-    cudaDeviceSynchronize();
+    hipDeviceSynchronize();
     hr_timer.stop();
     hr_timer.display_and_clear(std::cout);
 

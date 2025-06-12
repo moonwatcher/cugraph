@@ -113,12 +113,12 @@ class Tests_Degree : public ::testing::TestWithParam<Degree_Usecase> {
                      graph_view.number_of_vertices(),
                      !store_transposed);
 
-    RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+    RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
 
     auto d_in_degrees  = graph_view.compute_in_degrees(handle);
     auto d_out_degrees = graph_view.compute_out_degrees(handle);
 
-    RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+    RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
 
     auto h_cugraph_in_degrees  = cugraph::test::to_host(handle, d_in_degrees);
     auto h_cugraph_out_degrees = cugraph::test::to_host(handle, d_out_degrees);

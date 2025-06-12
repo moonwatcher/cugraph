@@ -60,7 +60,7 @@ class Tests_SGMaximalIndependentSet
     HighResTimer hr_timer{};
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());
+      RAFT_CUDA_TRY(hipDeviceSynchronize());
       hr_timer.start("Construct graph");
     }
 
@@ -71,7 +71,7 @@ class Tests_SGMaximalIndependentSet
         handle, input_usecase, false, true);
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());
+      RAFT_CUDA_TRY(hipDeviceSynchronize());
 
       hr_timer.stop();
       hr_timer.display_and_clear(std::cout);
@@ -87,11 +87,11 @@ class Tests_SGMaximalIndependentSet
 
     // Test MIS
     if (mis_usecase.check_correctness) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());
+      RAFT_CUDA_TRY(hipDeviceSynchronize());
       std::vector<vertex_t> h_mis(d_mis.size());
       raft::update_host(h_mis.data(), d_mis.data(), d_mis.size(), handle.get_stream());
 
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());
+      RAFT_CUDA_TRY(hipDeviceSynchronize());
 
       auto vertex_first = sg_graph_view.local_vertex_partition_range_first();
       auto vertex_last  = sg_graph_view.local_vertex_partition_range_last();
@@ -122,7 +122,7 @@ class Tests_SGMaximalIndependentSet
           inclusiong_flags[v_offset] = vertex_t{1};
         });
 
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());
+      RAFT_CUDA_TRY(hipDeviceSynchronize());
 
       per_v_transform_reduce_outgoing_e(
         handle,
@@ -139,7 +139,7 @@ class Tests_SGMaximalIndependentSet
         cugraph::reduce_op::plus<vertex_t>{},
         d_total_outgoing_nbrs_included_mis.begin());
 
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());
+      RAFT_CUDA_TRY(hipDeviceSynchronize());
 
       std::vector<vertex_t> h_total_outgoing_nbrs_included_mis(
         d_total_outgoing_nbrs_included_mis.size());
@@ -148,7 +148,7 @@ class Tests_SGMaximalIndependentSet
                         d_total_outgoing_nbrs_included_mis.size(),
                         handle.get_stream());
 
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());
+      RAFT_CUDA_TRY(hipDeviceSynchronize());
 
       {
         auto vertex_first = sg_graph_view.local_vertex_partition_range_first();

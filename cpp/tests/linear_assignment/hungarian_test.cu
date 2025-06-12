@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2020-2024, NVIDIA CORPORATION.  All rights reserved.
  *
@@ -9,7 +10,7 @@
  *
  */
 
-#include "cuda_profiler_api.h"
+#include "hip/hip_runtime_api.h"
 #include "gtest/gtest.h"
 #include "utilities/conversion_utilities.hpp"
 
@@ -26,25 +27,25 @@
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/random.h>
 
-#include <curand_kernel.h>
+#include <hiprand/hiprand_kernel.h>
 
-__global__ void setup_generator(curandState* state)
+__global__ void setup_generator(hiprandState* state)
 {
   int id = threadIdx.x + blockIdx.x * blockDim.x;
-  curand_init(43, id, 0, &state[id]);
+  hiprand_init(43, id, 0, &state[id]);
 }
 
 template <typename T>
-__global__ void generate_random(curandState* state, int n, T* data, int32_t upper_bound)
+__global__ void generate_random(hiprandState* state, int n, T* data, int32_t upper_bound)
 {
   int first  = threadIdx.x + blockIdx.x * blockDim.x;
   int stride = blockDim.x * gridDim.x;
 
   thrust::uniform_int_distribution<int> rnd(0, upper_bound);
 
-  curandState local_state = state[first];
+  hiprandState local_state = state[first];
   for (int id = first; id < n; id += stride) {
-    T temp = curand_uniform(&local_state);
+    T temp = hiprand_uniform(&local_state);
     temp *= (upper_bound - T{1.0});
     temp = floor(temp);
     temp += T{1.0};
@@ -335,14 +336,14 @@ void random_test(int32_t num_rows, int32_t num_cols, int32_t upper_bound, int re
   HighResTimer hr_timer;
 
   rmm::device_uvector<int32_t>  data_v(num_rows * num_cols, handle.get_stream());
-  rmm::device_uvector<curandState> state_vals_v(num_threads, handle.get_stream());
+  rmm::device_uvector<hiprandState> state_vals_v(num_threads, handle.get_stream());
   rmm::device_uvector<int32_t> assignment_v(num_rows, handle.get_stream());
 
   std::vector<int32_t> validate(num_cols);
 
   hr_timer.start("initialization");
 
-  cudaStream_t stream{0};
+  hipStream_t stream{0};
   int32_t *d_data = data_v.data();
   //int64_t seed{85};
   int64_t seed{time(nullptr)};
@@ -357,7 +358,7 @@ void random_test(int32_t num_rows, int32_t num_cols, int32_t upper_bound, int re
                      d_data[e] = rnd(rng);
                    });
 
-  cudaDeviceSynchronize();
+  hipDeviceSynchronize();
 
   hr_timer.stop();
 

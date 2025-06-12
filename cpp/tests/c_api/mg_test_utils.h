@@ -47,15 +47,15 @@
 
 #define C_CUDA_TRY(call)              \
   do {                                \
-    cudaError_t const status = call;  \
-    if (status != cudaSuccess) {      \
-      cudaGetLastError();             \
+    hipError_t const status = call;  \
+    if (status != hipSuccess) {      \
+      hipGetLastError();             \
       printf(                         \
         "CUDA error encountered at: " \
         "call='%s', Reason=%s:%s",    \
         #call,                        \
-        cudaGetErrorName(status),     \
-        cudaGetErrorString(status));  \
+        hipGetErrorName(status),     \
+        hipGetErrorString(status));  \
       exit(1);                        \
     }                                 \
   } while (0)

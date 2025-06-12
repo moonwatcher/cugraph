@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 
 /*
  * Copyright (c) 2024, NVIDIA CORPORATION.
@@ -64,7 +65,7 @@ class Tests_SGLookupEdgeSrcDst
     HighResTimer hr_timer{};
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());
+      RAFT_CUDA_TRY(hipDeviceSynchronize());
       hr_timer.start("Construct graph");
     }
 
@@ -83,7 +84,7 @@ class Tests_SGLookupEdgeSrcDst
       handle, std::move(sg_graph), std::move(sg_edge_weights), std::move(sg_renumber_map), false);
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());
+      RAFT_CUDA_TRY(hipDeviceSynchronize());
       hr_timer.stop();
       hr_timer.display_and_clear(std::cout);
     }

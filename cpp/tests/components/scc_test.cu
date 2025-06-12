@@ -32,7 +32,7 @@
 #include <thrust/transform.h>
 #include <thrust/unique.h>
 
-#include <cuda_profiler_api.h>
+#include <hip/hip_runtime_api.h>
 
 #include <algorithm>
 #include <iterator>
@@ -153,9 +153,9 @@ struct Tests_Strongly_CC : ::testing::TestWithParam<Usecase> {
     ASSERT_TRUE(mm_is_matrix(mc));
     ASSERT_TRUE(mm_is_coordinate(mc));
 
-    cudaDeviceProp prop;
+    hipDeviceProp_t prop;
     int device = 0;
-    cudaGetDeviceProperties(&prop, device);
+    hipGetDeviceProperties(&prop, device);
 
     size_t nrows = static_cast<size_t>(m);
     size_t n2    = 2 * nrows * nrows;
@@ -190,15 +190,15 @@ struct Tests_Strongly_CC : ::testing::TestWithParam<Usecase> {
       hr_timer.start("SCC");
       cugraph::connected_components(
         G, cugraph::cugraph_cc_t::CUGRAPH_STRONG, d_labels.data().get());
-      cudaDeviceSynchronize();
+      hipDeviceSynchronize();
       auto time_tmp = hr_timer.stop();
       strongly_cc_time.push_back(time_tmp);
     } else {
-      cudaProfilerStart();
+      hipProfilerStart();
       cugraph::connected_components(
         G, cugraph::cugraph_cc_t::CUGRAPH_STRONG, d_labels.data().get());
-      cudaProfilerStop();
-      cudaDeviceSynchronize();
+      hipProfilerStop();
+      hipDeviceSynchronize();
     }
     strongly_cc_counts.push_back(count);
 
@@ -231,9 +231,9 @@ TEST_F(SCCSmallTest, CustomGraphSimpleLoops)
   size_t nrows = 5;
   size_t n2    = 2 * nrows * nrows;
 
-  cudaDeviceProp prop;
+  hipDeviceProp_t prop;
   int device = 0;
-  cudaGetDeviceProperties(&prop, device);
+  hipGetDeviceProperties(&prop, device);
 
   ASSERT_TRUE(n2 < prop.totalGlobalMem);
 
@@ -263,12 +263,12 @@ TEST_F(SCCSmallTest, CustomGraphSimpleLoops)
 
   std::vector<size_t> v_counts(d_counts.size());
 
-  cudaMemcpy(v_counts.data(),
+  hipMemcpy(v_counts.data(),
              d_counts.data().get(),
              sizeof(size_t) * v_counts.size(),
-             cudaMemcpyDeviceToHost);
+             hipMemcpyDeviceToHost);
 
-  cudaDeviceSynchronize();
+  hipDeviceSynchronize();
 
   std::vector<size_t> v_counts_exp{2, 1, 2};
 
@@ -282,9 +282,9 @@ TEST_F(SCCSmallTest, /*DISABLED_*/ CustomGraphWithSelfLoops)
   size_t nrows = 5;
   size_t n2    = 2 * nrows * nrows;
 
-  cudaDeviceProp prop;
+  hipDeviceProp_t prop;
   int device = 0;
-  cudaGetDeviceProperties(&prop, device);
+  hipGetDeviceProperties(&prop, device);
 
   ASSERT_TRUE(n2 < prop.totalGlobalMem);
 
@@ -314,12 +314,12 @@ TEST_F(SCCSmallTest, /*DISABLED_*/ CustomGraphWithSelfLoops)
 
   std::vector<size_t> v_counts(d_counts.size());
 
-  cudaMemcpy(v_counts.data(),
+  hipMemcpy(v_counts.data(),
              d_counts.data().get(),
              sizeof(size_t) * v_counts.size(),
-             cudaMemcpyDeviceToHost);
+             hipMemcpyDeviceToHost);
 
-  cudaDeviceSynchronize();
+  hipDeviceSynchronize();
 
   std::vector<size_t> v_counts_exp{2, 1, 1, 1};
 

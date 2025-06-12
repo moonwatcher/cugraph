@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2020-2024, NVIDIA CORPORATION.
  *
@@ -236,8 +237,8 @@ inline auto parse_test_options(int argc, char** argv)
     auto comm_rank = cugraph::test::query_mpi_comm_world_rank();                        \
     auto comm_size = cugraph::test::query_mpi_comm_world_size();                        \
     int num_gpus_per_node{};                                                            \
-    RAFT_CUDA_TRY(cudaGetDeviceCount(&num_gpus_per_node));                              \
-    RAFT_CUDA_TRY(cudaSetDevice(comm_rank % num_gpus_per_node));                        \
+    RAFT_CUDA_TRY(hipGetDeviceCount(&num_gpus_per_node));                              \
+    RAFT_CUDA_TRY(hipSetDevice(comm_rank % num_gpus_per_node));                        \
     ::testing::InitGoogleTest(&argc, argv);                                             \
     auto const cmd_opts = parse_test_options(argc, argv);                               \
     auto const rmm_mode = cmd_opts["rmm_mode"].as<std::string>();                       \

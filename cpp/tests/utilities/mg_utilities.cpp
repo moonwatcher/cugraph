@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2021-2024, NVIDIA CORPORATION.
  *
@@ -90,7 +91,7 @@ void enforce_p2p_initialization(raft::comms::comms_t const& comm, rmm::cuda_stre
                                  rx_ranks,
                                  stream);
 
-  RAFT_CUDA_TRY(cudaStreamSynchronize(stream));
+  RAFT_CUDA_TRY(hipStreamSynchronize(stream));
 }
 
 }  // namespace test

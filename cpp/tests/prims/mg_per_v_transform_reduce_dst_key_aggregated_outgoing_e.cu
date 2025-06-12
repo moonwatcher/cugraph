@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2021-2025, NVIDIA CORPORATION.
  *
@@ -104,7 +105,7 @@ class Tests_MGPerVTransformReduceDstKeyAggregatedOutgoingE
     // 1. create MG graph
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       handle_->get_comms().barrier();
       hr_timer.start("MG Construct graph");
     }
@@ -114,7 +115,7 @@ class Tests_MGPerVTransformReduceDstKeyAggregatedOutgoingE
         *handle_, input_usecase, prims_usecase.test_weighted, true);
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       handle_->get_comms().barrier();
       hr_timer.stop();
       hr_timer.display_and_clear(std::cout);
@@ -193,7 +194,7 @@ class Tests_MGPerVTransformReduceDstKeyAggregatedOutgoingE
         mg_graph_view.local_vertex_partition_range_size(), handle_->get_stream()));
 
       if (cugraph::test::g_perf) {
-        RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+        RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
         handle_->get_comms().barrier();
         hr_timer.start("MG per_v_transform_reduce_outgoing_e");
       }
@@ -284,7 +285,7 @@ class Tests_MGPerVTransformReduceDstKeyAggregatedOutgoingE
       }
 
       if (cugraph::test::g_perf) {
-        RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+        RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
         handle_->get_comms().barrier();
         hr_timer.stop();
         hr_timer.display_and_clear(std::cout);

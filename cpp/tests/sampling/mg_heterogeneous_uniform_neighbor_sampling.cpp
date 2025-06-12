@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2022-2024, NVIDIA CORPORATION.
  *
@@ -67,7 +68,7 @@ class Tests_MGHeterogeneous_Uniform_Neighbor_Sampling
     // 1. create MG graph
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       handle_->get_comms().barrier();
       hr_timer.start("MG construct graph");
     }
@@ -82,7 +83,7 @@ class Tests_MGHeterogeneous_Uniform_Neighbor_Sampling
         false /* drop_multi_edges */);
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       handle_->get_comms().barrier();
       hr_timer.stop();
       hr_timer.display_and_clear(std::cout);
@@ -164,11 +165,11 @@ class Tests_MGHeterogeneous_Uniform_Neighbor_Sampling
     }
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       handle_->get_comms().barrier();
       hr_timer.start("MG uniform_neighbor_sample");
     }
-    RAFT_CUDA_TRY(cudaDeviceSynchronize());
+    RAFT_CUDA_TRY(hipDeviceSynchronize());
 
     auto&& [src_out, dst_out, wgt_out, edge_id, edge_type, hop, offsets] =
       cugraph::heterogeneous_uniform_neighbor_sample(
@@ -196,7 +197,7 @@ class Tests_MGHeterogeneous_Uniform_Neighbor_Sampling
           heterogeneous_uniform_neighbor_sampling_usecase.with_replacement});
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       handle_->get_comms().barrier();
       hr_timer.stop();
       hr_timer.display_and_clear(std::cout);

@@ -66,7 +66,7 @@ class Tests_KCore : public ::testing::TestWithParam<std::tuple<KCore_Usecase, in
     HighResTimer hr_timer{};
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       hr_timer.start("Construct graph");
     }
 
@@ -75,7 +75,7 @@ class Tests_KCore : public ::testing::TestWithParam<std::tuple<KCore_Usecase, in
         handle, input_usecase, false, renumber, true, true);
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       hr_timer.stop();
       hr_timer.display_and_clear(std::cout);
     }
@@ -95,7 +95,7 @@ class Tests_KCore : public ::testing::TestWithParam<std::tuple<KCore_Usecase, in
                          k_core_usecase.k);
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       hr_timer.start("K-core");
     }
 
@@ -109,7 +109,7 @@ class Tests_KCore : public ::testing::TestWithParam<std::tuple<KCore_Usecase, in
                                     std::make_optional(core_number_span));
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       hr_timer.stop();
       hr_timer.display_and_clear(std::cout);
     }

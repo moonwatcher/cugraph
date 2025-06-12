@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2021-2025, NVIDIA CORPORATION.
  *
@@ -347,7 +348,7 @@ class Rmat_Usecase : public detail::TranslateGraph_Usecase {
     // shuffle_vertex_pairs_to_local_gpu_by_edge_partitioning requires a temporary buffer with the
     // size of the original data). With the current implementation, the temporary memory requirement
     // is roughly 50% of the original data with num_partitions_per_gpu = 2. If we use
-    // cuMemAddressReserve
+    // hipMemAddressReserve
     // (https://developer.nvidia.com/blog/introducing-low-level-gpu-virtual-memory-management), we
     // can reduce the temporary memory requirement to (1 / num_partitions) * (original data size)
     size_t constexpr num_partitions_per_gpu = 8;

@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2023-2024, NVIDIA CORPORATION.
  *
@@ -53,7 +54,7 @@ class Tests_MGSelectRandomVertices
     HighResTimer hr_timer{};
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());
+      RAFT_CUDA_TRY(hipDeviceSynchronize());
       handle_->get_comms().barrier();
       hr_timer.start("MG Construct graph");
     }
@@ -63,7 +64,7 @@ class Tests_MGSelectRandomVertices
         *handle_, input_usecase, false, true);
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());
+      RAFT_CUDA_TRY(hipDeviceSynchronize());
       handle_->get_comms().barrier();
       hr_timer.stop();
       hr_timer.display_and_clear(std::cout);
@@ -125,7 +126,7 @@ class Tests_MGSelectRandomVertices
                                             with_replacement,
                                             sort_vertices);
 
-          RAFT_CUDA_TRY(cudaDeviceSynchronize());
+          RAFT_CUDA_TRY(hipDeviceSynchronize());
 
           auto h_sampled_vertices = cugraph::test::to_host(*handle_, d_sampled_vertices);
 
@@ -172,7 +173,7 @@ class Tests_MGSelectRandomVertices
             with_replacement,
             sort_vertices);
 
-          RAFT_CUDA_TRY(cudaDeviceSynchronize());
+          RAFT_CUDA_TRY(hipDeviceSynchronize());
 
           auto h_sampled_vertices = cugraph::test::to_host(*handle_, d_sampled_vertices);
 

@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2022-2024, NVIDIA CORPORATION.
  *
@@ -122,7 +123,7 @@ class Tests_RandomWalks : public ::testing::TestWithParam<tuple_t> {
     auto [randomwalks_usecase, input_usecase] = param;
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       hr_timer.start("Construct graph");
     }
 
@@ -132,7 +133,7 @@ class Tests_RandomWalks : public ::testing::TestWithParam<tuple_t> {
         handle, input_usecase, randomwalks_usecase.test_weighted, renumber);
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       hr_timer.stop();
       hr_timer.display_and_clear(std::cout);
     }
@@ -148,7 +149,7 @@ class Tests_RandomWalks : public ::testing::TestWithParam<tuple_t> {
     cugraph::detail::sequence_fill(handle.get_stream(), d_start.begin(), d_start.size(), 0);
 
     if (cugraph::test::g_perf) {
-      RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+      RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
       hr_timer.start("Random walks");
     }
 
@@ -170,7 +171,7 @@ class Tests_RandomWalks : public ::testing::TestWithParam<tuple_t> {
                             max_length);
 
       if (cugraph::test::g_perf) {
-        RAFT_CUDA_TRY(cudaDeviceSynchronize());  // for consistent performance measurement
+        RAFT_CUDA_TRY(hipDeviceSynchronize());  // for consistent performance measurement
         hr_timer.stop();
         hr_timer.display_and_clear(std::cout);
       }
