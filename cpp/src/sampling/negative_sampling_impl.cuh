@@ -85,8 +85,12 @@ normalize_biases(raft::handle_t const& handle,
   if constexpr (multi_gpu) {
     rmm::device_scalar<weight_t> d_sum(sum, handle.get_stream());
 
+    #warning LG: seems like older rmm::device_scalar did not have a size() method, but it always returns 1
+    // gpu_biases = cugraph::device_allgatherv(
+    //   handle, handle.get_comms(), raft::device_span<weight_t const>{d_sum.data(), d_sum.size()});
+
     gpu_biases = cugraph::device_allgatherv(
-      handle, handle.get_comms(), raft::device_span<weight_t const>{d_sum.data(), d_sum.size()});
+      handle, handle.get_comms(), raft::device_span<weight_t const>{d_sum.data(), 1});
 
     weight_t aggregate_sum = thrust::reduce(
       handle.get_thrust_policy(), gpu_biases->begin(), gpu_biases->end(), weight_t{0});
