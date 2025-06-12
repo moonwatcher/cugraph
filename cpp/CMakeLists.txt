@@ -63,11 +63,13 @@ rapids_cmake_build_type(Release)
 
 option(BUILD_SHARED_LIBS "Build cuGraph shared libraries" ON)
 option(BUILD_CUGRAPH_MG_TESTS "Build cuGraph multigpu algorithm tests" OFF)
+option(BUILD_CUGRAPH_MTMG_TESTS "Build cuGraph MTMG algorithm tests" OFF)
 option(CMAKE_HIP_LINEINFO "Enable the -lineinfo option for nvcc (useful for cuda-memcheck / profiler" OFF)
 option(BUILD_TESTS "Configure CMake to build tests" ON)
 option(USE_RAFT_STATIC "Build raft as a static library" OFF)
 option(CUGRAPH_COMPILE_RAFT_LIB "Compile the raft library instead of using it header-only" ON)
 option(HIP_STATIC_RUNTIME "Statically link the HIP toolkit runtime and libraries" OFF)
+option(BUILD_WITH_OFFLOAD_COMPRESS "Compress library" ON)
 
 message(VERBOSE "CUGRAPH: HIP_STATIC_RUNTIME=${HIP_STATIC_RUNTIME}")
 
@@ -139,17 +141,16 @@ list(APPEND CUGRAPH_CXX_FLAGS -Wno-unused-local-typedef)
 list(APPEND CUGRAPH_CXX_FLAGS -Wno-unused-result)
 list(APPEND CUGRAPH_CXX_FLAGS -Wno-unused-variable)
 
-# Those don't seem to be needed
-# list(APPEND CUGRAPH_CXX_FLAGS -I${HIP_INCLUDE_DIRS})
-# list(APPEND CUGRAPH_CXX_FLAGS -I${HIP_INCLUDE_DIRS}/rocprim)
-# list(APPEND CUGRAPH_CXX_FLAGS -I${HIP_INCLUDE_DIRS}/hipcub)
-# list(APPEND CUGRAPH_CXX_FLAGS -I${HIP_INCLUDE_DIRS}/hipblas)
-# list(APPEND CUGRAPH_CXX_FLAGS -I${HIP_INCLUDE_DIRS}/hipsparse)
-# list(APPEND CUGRAPH_CXX_FLAGS -I${HIP_INCLUDE_DIRS}/hiprand)
-# list(APPEND CUGRAPH_CXX_FLAGS -I${HIP_INCLUDE_DIRS}/hipsolver)
 # list(APPEND CUGRAPH_CXX_FLAGS -cxx-isystem ${CMAKE_CURRENT_SOURCE_DIR}/include)
-# list(APPEND CUGRAPH_CXX_FLAGS -I${CMAKE_CURRENT_SOURCE_DIR}/src/)
-# list(APPEND CUGRAPH_CXX_FLAGS -I${CMAKE_CURRENT_SOURCE_DIR}/include)
+list(APPEND CUGRAPH_CXX_FLAGS -I${HIP_INCLUDE_DIRS})
+list(APPEND CUGRAPH_CXX_FLAGS -I${HIP_INCLUDE_DIRS}/rocprim)
+list(APPEND CUGRAPH_CXX_FLAGS -I${HIP_INCLUDE_DIRS}/hipcub)
+list(APPEND CUGRAPH_CXX_FLAGS -I${HIP_INCLUDE_DIRS}/hipblas)
+list(APPEND CUGRAPH_CXX_FLAGS -I${HIP_INCLUDE_DIRS}/hipsparse)
+list(APPEND CUGRAPH_CXX_FLAGS -I${HIP_INCLUDE_DIRS}/hiprand)
+list(APPEND CUGRAPH_CXX_FLAGS -I${HIP_INCLUDE_DIRS}/hipsolver)
+list(APPEND CUGRAPH_CXX_FLAGS -I${CMAKE_CURRENT_SOURCE_DIR}/src/)
+list(APPEND CUGRAPH_CXX_FLAGS -I${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Option to enable line info in HIP device compilation to allow introspection when profiling /
 # memchecking
@@ -364,7 +365,6 @@ foreach(SOURCE_FILE ${CUGRAPH_SOURCES})
         set_source_files_properties( ${SOURCE_FILE} PROPERTIES LANGUAGE CXX)
     endif()
 endforeach()
-add_library(cugraph ${CUGRAPH_SOURCES})
 
 set(CUGRAPH_SOURCES_MG
     src/utilities/shuffle_vertices_mg_v32_fp.cu
@@ -381,10 +381,13 @@ set(CUGRAPH_SOURCES_MG
     src/detail/collect_comm_wrapper_mg_v64_e64.cu
     src/sampling/random_walks_mg_v64_e64.cu
     src/sampling/random_walks_mg_v32_e32.cu
-    src/community/detail/common_methods_mg_v64_e64.cu
-    src/community/detail/common_methods_mg_v32_e32.cu
-    src/community/detail/refine_mg_v64_e64.cu
-    src/community/detail/refine_mg_v32_e32.cu
+
+    # LG: Those cause memory exceed limit compilation errors 
+    # src/community/detail/common_methods_mg_v64_e64.cu
+    # src/community/detail/common_methods_mg_v32_e32.cu
+    # src/community/detail/refine_mg_v64_e64.cu
+    # src/community/detail/refine_mg_v32_e32.cu
+
     src/community/edge_triangle_count_mg_v64_e64.cu
     src/community/edge_triangle_count_mg_v32_e32.cu
     src/community/detail/maximal_independent_moves_mg_v64_e64.cu
@@ -499,8 +502,8 @@ foreach(SOURCE_FILE ${CUGRAPH_SOURCES_MG})
         set_source_files_properties( ${SOURCE_FILE} PROPERTIES LANGUAGE CXX)
     endif()
 endforeach()
-# Uncomment to compile multi-gpu code
-# add_library(cugraph ${CUGRAPH_SOURCES_MG})
+
+add_library(cugraph ${CUGRAPH_SOURCES} ${CUGRAPH_SOURCES_MG})
 
 set_target_properties(cugraph
     PROPERTIES BUILD_RPATH                         "\$ORIGIN"
@@ -514,6 +517,10 @@ set_target_properties(cugraph
                POSITION_INDEPENDENT_CODE           ON
                INTERFACE_POSITION_INDEPENDENT_CODE ON
 )
+
+if(BUILD_WITH_OFFLOAD_COMPRESS)
+  set_target_properties(cugraph PROPERTIES COMPILE_FLAGS "--offload-compress")
+endif()
 
 target_compile_options(cugraph
             PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CUGRAPH_CXX_FLAGS}>"
@@ -564,10 +571,6 @@ target_link_libraries(cugraph
         hipsparse
         hiprand
         hipsolver 
-        # ${COMPILED_RAFT_LIB}
-        # cuco::cuco
-        # rmm::rmm_logger_impl
-        # raft::raft_logger_impl
     )
 
 ################################################################################
@@ -620,14 +623,23 @@ set(CUGRAPH_C_SOURCES
     src/c_api/edgelist.cpp
     src/c_api/renumber_arbitrary_edgelist.cu
 )
+foreach(SOURCE_FILE ${CUGRAPH_C_SOURCES})
+    if(${SOURCE_FILE} MATCHES "\\.cu$")
+        set_source_files_properties( ${SOURCE_FILE} PROPERTIES LANGUAGE CXX)
+    endif()
+endforeach()
 
 set(CUGRAPH_C_MG_SOURCES
     src/c_api/graph_mg.cpp
     src/c_api/graph_helper_mg.cu
 )
+foreach(SOURCE_FILE ${CUGRAPH_C_MG_SOURCES})
+    if(${SOURCE_FILE} MATCHES "\\.cu$")
+        set_source_files_properties( ${SOURCE_FILE} PROPERTIES LANGUAGE CXX)
+    endif()
+endforeach()
 
-add_library(cugraph_c ${CUGRAPH_C_SOURCES})
-# add_library(cugraph_c ${CUGRAPH_C_MG_SOURCES})
+add_library(cugraph_c ${CUGRAPH_C_SOURCES} ${CUGRAPH_C_MG_SOURCES})
 add_library(cugraph::cugraph_c ALIAS cugraph_c)
 
 # Currently presuming we aren't calling any CUDA kernels in cugraph_c
@@ -679,12 +691,11 @@ endif()
 
 ################################################################################
 # - install targets ------------------------------------------------------------
-# rapids_cmake_install_lib_dir( lib_dir )
+rapids_cmake_install_lib_dir( lib_dir )
 include(CPack)
 
 install(TARGETS cugraph
-        # DESTINATION ${lib_dir}
-        DESTINATION lib
+        DESTINATION ${lib_dir}
         EXPORT cugraph-exports)
 
 install(DIRECTORY include/cugraph/
@@ -694,8 +705,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/cugraph/version_config.hpp
         DESTINATION include/cugraph)
 
 install(TARGETS cugraph_c
-        # DESTINATION ${lib_dir}
-        DESTINATION lib
+        DESTINATION ${lib_dir}
         EXPORT cugraph-exports)
 
 install(DIRECTORY include/cugraph_c/

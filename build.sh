@@ -13,6 +13,7 @@ set -e
 
 export RAPIDS_CMAKE_BRANCH=feat/25.04-logger
 export RAPIDS_CMAKE_URL=https://${GITHUB_USER}:${GITHUB_PASS}@github.com/AMD-AI/ROCmDS-cmake
+# export VERBOSE=1
 
 NUMARGS=$#
 ARGS=$*
@@ -104,8 +105,10 @@ PYTHON_ARGS_FOR_INSTALL="-m pip install --no-build-isolation --no-deps --config-
 # Set defaults for vars that may not have been defined externally
 #  FIXME: if PREFIX is not set, check CONDA_PREFIX, but there is no fallback
 #  from there!
-INSTALL_PREFIX=${PREFIX:=${CONDA_PREFIX}}
+INSTALL_PREFIX="/opt/rocm-ds"
+# INSTALL_PREFIX=${PREFIX:=${CONDA_PREFIX}}
 PARALLEL_LEVEL=${PARALLEL_LEVEL:=`nproc`}
+# PARALLEL_LEVEL=${PARALLEL_LEVEL:=1}
 BUILD_ABI=${BUILD_ABI:=ON}
 
 function hasArg {
@@ -234,7 +237,7 @@ if buildDefault || hasArg libcugraph || hasArg all; then
         fi
     else
         if (( ${BUILD_ALL_GPU_ARCH} == 0 )); then
-            CUGRAPH_CMAKE_CUDA_ARCHITECTURES="NATIVE"
+            CUGRAPH_CMAKE_CUDA_ARCHITECTURES="gfx1100"
             echo "Building for the architecture of the GPU in the system..."
         else
             CUGRAPH_CMAKE_CUDA_ARCHITECTURES="RAPIDS"
@@ -267,7 +270,7 @@ if buildDefault || hasArg libcugraph_etl || hasArg all; then
         fi
     else
         if (( ${BUILD_ALL_GPU_ARCH} == 0 )); then
-            CUGRAPH_CMAKE_CUDA_ARCHITECTURES="NATIVE"
+            CUGRAPH_CMAKE_CUDA_ARCHITECTURES="gfx1100"
             echo "Building for the architecture of the GPU in the system..."
         else
             CUGRAPH_CMAKE_CUDA_ARCHITECTURES="RAPIDS"

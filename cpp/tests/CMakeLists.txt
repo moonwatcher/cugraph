@@ -18,15 +18,18 @@ enable_testing()
 
 include(rapids-test)
 rapids_test_init()
+include_directories(/opt/rocm/include)
 
 ###################################################################################################
-# - set rapids dataset path ----------------------------------------------------------------------
-if(RAPIDS_DATASET_ROOT_DIR)
-    message(STATUS "setting default RAPIDS_DATASET_ROOT_DIR to: ${RAPIDS_DATASET_ROOT_DIR}")
-    string(CONCAT CMAKE_C_FLAGS ${CMAKE_C_FLAGS} " -DRAPIDS_DATASET_ROOT_DIR=" "\\\"" ${RAPIDS_DATASET_ROOT_DIR} "\\\"")
-    string(CONCAT CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} " -DRAPIDS_DATASET_ROOT_DIR=" "\\\"" ${RAPIDS_DATASET_ROOT_DIR} "\\\"")
-    string(CONCAT CMAKE_CUDA_FLAGS ${CMAKE_CUDA_FLAGS} " -DRAPIDS_DATASET_ROOT_DIR=" "\\\"" ${RAPIDS_DATASET_ROOT_DIR} "\\\"")
-endif(RAPIDS_DATASET_ROOT_DIR)
+# - Pass on RAPIDS_DATASET_ROOT_DIR if it was specified in the environment
+set(ENV_RAPIDS_DATASET_ROOT_DIR $ENV{RAPIDS_DATASET_ROOT_DIR})
+
+if(ENV_RAPIDS_DATASET_ROOT_DIR)
+    message(STATUS "RAPIDS_DATASET_ROOT_DIR specified in environment variable ${ENV_RAPIDS_DATASET_ROOT_DIR}")
+    list(APPEND CUGRAPH_C_FLAGS -DRAPIDS_DATASET_ROOT_DIR="${ENV_RAPIDS_DATASET_ROOT_DIR}")
+    list(APPEND CUGRAPH_CXX_FLAGS -DRAPIDS_DATASET_ROOT_DIR="${ENV_RAPIDS_DATASET_ROOT_DIR}")
+    list(APPEND CUGRAPH_HIP_FLAGS -DRAPIDS_DATASET_ROOT_DIR="${ENV_RAPIDS_DATASET_ROOT_DIR}")
+endif()
 
 ###################################################################################################
 # - common C++ test utils -----------------------------------------------------------------------------
@@ -50,9 +53,16 @@ add_library(cugraphtestutil STATIC
             sampling/detail/sampling_post_processing_validate.cu
             ../../thirdparty/mmio/mmio.c)
 
+get_target_property(TEST_SOURCE_FILES cugraphtestutil SOURCES)
+foreach(SOURCE_FILE ${TEST_SOURCE_FILES})
+    if(${SOURCE_FILE} MATCHES "\\.cu$")
+        set_source_files_properties( ${SOURCE_FILE} PROPERTIES LANGUAGE CXX)
+    endif()
+endforeach()
+
 target_compile_options(cugraphtestutil
     PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${CUGRAPH_CXX_FLAGS}>"
-           "$<$<COMPILE_LANGUAGE:CUDA>:${CUGRAPH_CUDA_FLAGS}>"
+           "$<$<COMPILE_LANGUAGE:HIP>:${CUGRAPH_HIP_FLAGS}>"
 )
 
 set_property(TARGET cugraphtestutil PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -76,13 +86,12 @@ target_link_libraries(cugraphtestutil
 ###################################################################################################
 # - common C API test utils -----------------------------------------------------------------------
 
-add_library(cugraph_c_testutil STATIC
-            c_api/test_utils.cpp)
+add_library(cugraph_c_testutil STATIC c_api/test_utils.cpp)
 
 target_compile_options(cugraph_c_testutil
     PUBLIC "$<$<COMPILE_LANGUAGE:C>:${CUGRAPH_C_FLAGS}>"
            "$<$<COMPILE_LANGUAGE:CXX>:${CUGRAPH_CXX_FLAGS}>"
-           "$<$<COMPILE_LANGUAGE:CUDA>:${CUGRAPH_CUDA_FLAGS}>"
+           "$<$<COMPILE_LANGUAGE:HIP>:${CUGRAPH_HIP_FLAGS}>"
 )
 
 target_include_directories(cugraph_c_testutil
@@ -94,7 +103,7 @@ set_property(TARGET cugraph_c_testutil PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_link_libraries(cugraph_c_testutil
     PUBLIC
-        CUDA::toolkit
+        # CUDA::toolkit
     PRIVATE
         cugraph::cugraph_c
         cugraph::cugraph
@@ -119,6 +128,13 @@ if(BUILD_CUGRAPH_MG_TESTS)
                 sampling/random_walks_check_mg.cu
                 c_api/mg_test_utils.cpp
                 )
+
+    get_target_property(MG_SOURCE_FILES cugraphmgtestutil SOURCES)
+    foreach(SOURCE_FILE ${MG_SOURCE_FILES})
+        if(${SOURCE_FILE} MATCHES "\\.cu$")
+            set_source_files_properties( ${SOURCE_FILE} PROPERTIES LANGUAGE CXX)
+        endif()
+    endforeach()
 
     set_property(TARGET cugraphmgtestutil PROPERTY POSITION_INDEPENDENT_CODE ON)
 
@@ -162,22 +178,31 @@ function(ConfigureTest CMAKE_TEST_NAME)
         set(_CUGRAPH_TEST_PERCENT 100)
     endif()
 
+    set(CMAKE_HIP_COMPILER ${CMAKE_CXX_COMPILER})
+    set(CMAKE_LINKER ${CMAKE_CXX_COMPILER})
+
     add_executable(${CMAKE_TEST_NAME} ${_CUGRAPH_TEST_UNPARSED_ARGUMENTS})
+
+    get_target_property(CPPTEST_SOURCE_FILES ${CMAKE_TEST_NAME} SOURCES)
+    foreach(SOURCE_FILE ${CPPTEST_SOURCE_FILES})
+        if(${SOURCE_FILE} MATCHES "\\.cu$")
+            set_source_files_properties( ${SOURCE_FILE} PROPERTIES LANGUAGE CXX)
+        endif()
+    endforeach()
 
     target_link_libraries(${CMAKE_TEST_NAME}
         PRIVATE
             cugraphtestutil
             GTest::gtest
             GTest::gtest_main
-            test_logger_impls
     )
     set_target_properties(
         ${CMAKE_TEST_NAME}
             PROPERTIES INSTALL_RPATH "\$ORIGIN/../../../lib"
                        CXX_STANDARD                        17
                        CXX_STANDARD_REQUIRED               ON
-                       CUDA_STANDARD                       17
-                       CUDA_STANDARD_REQUIRED              ON)
+                       HIP_STANDARD                        17
+                       HIP_STANDARD_REQUIRED               ON)
 
     rapids_test_add(
         NAME ${CMAKE_TEST_NAME}
@@ -200,15 +225,21 @@ function(ConfigureTestMG CMAKE_TEST_NAME)
         GTest::gtest_main
         NCCL::NCCL
         MPI::MPI_CXX
-        test_logger_impls
     )
+    get_target_property(MGCPPTEST_SOURCE_FILES ${CMAKE_TEST_NAME} SOURCES)
+    foreach(SOURCE_FILE ${MGCPPTEST_SOURCE_FILES})
+        if(${SOURCE_FILE} MATCHES "\\.cu$")
+            set_source_files_properties( ${SOURCE_FILE} PROPERTIES LANGUAGE CXX)
+        endif()
+    endforeach()
+
     set_target_properties(
         ${CMAKE_TEST_NAME}
             PROPERTIES INSTALL_RPATH "\$ORIGIN/../../../lib"
                        CXX_STANDARD                        17
                        CXX_STANDARD_REQUIRED               ON
-                       CUDA_STANDARD                       17
-                       CUDA_STANDARD_REQUIRED              ON)
+                       HIP_STANDARD                        17
+                       HIP_STANDARD_REQUIRED               ON)
 
     rapids_test_add(
         NAME ${CMAKE_TEST_NAME}
@@ -244,6 +275,9 @@ function(ConfigureCTest CMAKE_TEST_NAME)
         set(_CUGRAPH_TEST_PERCENT 100)
     endif()
 
+    set(CMAKE_HIP_COMPILER ${CMAKE_CXX_COMPILER})
+    set(CMAKE_LINKER ${CMAKE_CXX_COMPILER})
+
     add_executable(${CMAKE_TEST_NAME} ${_CUGRAPH_TEST_UNPARSED_ARGUMENTS})
 
     target_link_libraries(${CMAKE_TEST_NAME}
@@ -252,15 +286,14 @@ function(ConfigureCTest CMAKE_TEST_NAME)
             cugraph_c_testutil
             GTest::gtest
             GTest::gtest_main
-            test_logger_impls
     )
     set_target_properties(
         ${CMAKE_TEST_NAME}
             PROPERTIES INSTALL_RPATH "\$ORIGIN/../../../lib"
                        CXX_STANDARD                        17
                        CXX_STANDARD_REQUIRED               ON
-                       CUDA_STANDARD                       17
-                       CUDA_STANDARD_REQUIRED              ON)
+                       HIP_STANDARD                       17
+                       HIP_STANDARD_REQUIRED              ON)
 
     rapids_test_add(
         NAME ${CMAKE_TEST_NAME}
@@ -285,15 +318,14 @@ function(ConfigureCTestMG CMAKE_TEST_NAME)
             GTest::gtest_main
             NCCL::NCCL
             MPI::MPI_CXX
-            test_logger_impls
     )
     set_target_properties(
         ${CMAKE_TEST_NAME}
             PROPERTIES INSTALL_RPATH "\$ORIGIN/../../../lib"
                        CXX_STANDARD                        17
                        CXX_STANDARD_REQUIRED               ON
-                       CUDA_STANDARD                       17
-                       CUDA_STANDARD_REQUIRED              ON)
+                       HIP_STANDARD                        17
+                       HIP_STANDARD_REQUIRED               ON)
 
     rapids_test_add(
         NAME ${CMAKE_TEST_NAME}
@@ -313,10 +345,6 @@ function(ConfigureCTestMG CMAKE_TEST_NAME)
 
 
 endfunction()
-
-add_library(test_logger_impls OBJECT)
-target_link_libraries(test_logger_impls PRIVATE raft::raft_logger_impl)
-
 
 ###################################################################################################
 ### test sources ##################################################################################
