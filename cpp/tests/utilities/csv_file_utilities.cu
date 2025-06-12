@@ -139,7 +139,7 @@ read_edgelist_from_csv_file(raft::handle_t const& handle,
   auto length = file.tellg();
   file.seekg(0, file.beg);
 
-  std::vector<char> buffer(length + 1);
+  std::vector<char> buffer(int(length) + 1);
 
   file.read(buffer.data(), length);
   CUGRAPH_EXPECTS(file, "File read failure.");

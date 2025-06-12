@@ -223,8 +223,8 @@ int test_sssp_with_transpose_double()
 
   vertex_t src[]                   = {0, 1, 1, 2, 2, 2, 3, 4};
   vertex_t dst[]                   = {1, 3, 4, 0, 1, 3, 5, 5};
-  double wgt[]                     = {0.1d, 2.1d, 1.1d, 5.1d, 3.1d, 4.1d, 7.2d, 3.2d};
-  double expected_distances[]      = {0.0d, 0.1d, DBL_MAX, 2.2d, 1.2d, 4.4d};
+  double wgt[]                     = {0.1L, 2.1L, 1.1L, 5.1L, 3.1L, 4.1L, 7.2L, 3.2L};
+  double expected_distances[]      = {0.0L, 0.1L, DBL_MAX, 2.2L, 1.2L, 4.4L};
   vertex_t expected_predecessors[] = {-1, 0, -1, 1, 1, 4};
 
   // Bfs wants store_transposed = FALSE
