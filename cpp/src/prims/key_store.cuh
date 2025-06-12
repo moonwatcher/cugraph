@@ -76,7 +76,7 @@ struct key_binary_search_store_device_view_t {
 template <typename ViewType>
 struct key_cuco_store_contains_device_view_t {
   using key_type                   = typename ViewType::key_type;
-  using cuco_store_device_ref_type = typename ViewType::cuco_set_type::ref_type<cuco::contains_tag>;
+  using cuco_store_device_ref_type = typename ViewType::cuco_set_type::template ref_type<cuco::contains_tag>;
 
   static_assert(!ViewType::binary_search);
 
@@ -93,7 +93,7 @@ struct key_cuco_store_contains_device_view_t {
 template <typename ViewType>
 struct key_cuco_store_insert_device_view_t {
   using key_type                   = typename ViewType::key_type;
-  using cuco_store_device_ref_type = typename ViewType::cuco_set_type::ref_type<cuco::insert_tag>;
+  using cuco_store_device_ref_type = typename ViewType::cuco_set_type::template ref_type<cuco::insert_tag>;
 
   static_assert(!ViewType::binary_search);
 
