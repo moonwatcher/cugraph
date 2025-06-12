@@ -419,7 +419,7 @@ EdgeTypeAndIdToSrcDstLookupContainerType build_edge_id_and_type_to_src_dst_looku
              cugraph::detail::compute_gpu_id_from_ext_edge_id_t<edge_t>{
                comm_size,
                major_comm_size,
-               minor_comm_size}] __device__(auto,
+               minor_comm_size}] __host__ __device__(auto,
                                             auto,
                                             cuda::std::nullopt_t,
                                             cuda::std::nullopt_t,
